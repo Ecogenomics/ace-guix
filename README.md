@@ -17,7 +17,7 @@ as instructed.
 * [dirseq](https://github.com/wwood/dirseq) is a metatranscriptome-target gene coverage calculator
 
 ### ACE Software available in the main Guix repository
-For these packages this repository is not needed as the software can be installed by the usual method in Guix e.g.
+For some packages this repository is not needed as the software can be installed by the usual method in Guix (better there than here)  e.g. one can simply
 ```
 guix pacakge -i orfm
 ```
