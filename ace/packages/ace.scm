@@ -19,7 +19,15 @@
 
 
 
-
+(define-module (ace packages ace)
+  #:use-module (gnu packages bioinformatics)
+  #:use-module (gnu packages ruby)
+  #:use-module ((guix licenses) #:prefix license:)
+  #:use-module (guix packages)
+  #:use-module (guix download)
+  #:use-module (guix utils)
+  #:use-module (guix build-system ruby))
+  
 ;;; This package seems to work, and could be submitted to guix-devel in future.
 (define-public dirseq
   (package
