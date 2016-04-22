@@ -20,15 +20,16 @@
 
 
 (define-module (ace packages ace)
+  #:use-module (ace packages external)
   #:use-module (gnu packages bioinformatics)
+  #:use-module (gnu packages python)
   #:use-module (gnu packages ruby)
   #:use-module ((guix licenses) #:prefix license:)
   #:use-module (guix packages)
   #:use-module (guix download)
   #:use-module (guix utils)
-  #:use-module (guix build-system ruby)
   #:use-module (guix build-system python)
-  #:use-module (gnu packages python))
+  #:use-module (guix build-system ruby))
   
 ;;; This package seems to work, and could be submitted to guix-devel in future.
 (define-public dirseq
@@ -148,3 +149,38 @@ ORF predicted and provide gene-wise coverages using DNAseq mappings.")
     (arguments
      `(#:python ,python-2
         #:tests? #f))))
+
+;; Cannot be contributed to the main Guix repository until pplacer has been
+;; packaged.
+(define-public checkm
+  (package
+   (name "checkm")
+   (version "1.0.5")
+   (source
+    (origin
+     (method url-fetch)
+     (uri (pypi-uri "checkm-genome" version))
+     (sha256
+      (base32
+       "13cm0401y4wvhyx0bxpfac0y3nkyx0y1b2w07mmvsiiw1dbqv870"))))
+   (build-system python-build-system)
+   (arguments
+    `(#:python ,python-2
+      #:phases
+      (modify-phases %standard-phases
+        (replace 'check
+                 (zero? (system* "bin/checkm" "test" "checkm_test_results"))))))
+   (native-inputs
+    `(("python2-setuptools" ,python2-setuptools)))
+   (propagated-inputs
+    `(("hmmer" ,hmmer)
+      ("prodigal" ,prodigal)
+      ("pplacer" ,pplacer)))
+   (home-page "https://ecogenomics.github.io/CheckM")
+   (synopsis "Assess the quality of putative genome bins")
+   (description
+    "CheckM provides a set of tools for assessing the quality of genomes
+recovered from isolates, single cells, or metagenomes.  It provides robust
+estimates of genome completeness and contamination by using collocated sets of
+genes that are ubiquitous and single-copy within a phylogenetic lineage.")
+   (license license:gpl3+)))
