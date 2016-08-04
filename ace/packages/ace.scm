@@ -26,7 +26,9 @@
   #:use-module (guix packages)
   #:use-module (guix download)
   #:use-module (guix utils)
-  #:use-module (guix build-system ruby))
+  #:use-module (guix build-system ruby)
+  #:use-module (guix build-system python)
+  #:use-module (gnu packages python))
   
 ;;; This package seems to work, and could be submitted to guix-devel in future.
 (define-public dirseq
@@ -72,3 +74,66 @@ RNAseq reads from metatranscriptomes are generally in the same direction as the
 ORF predicted and provide gene-wise coverages using DNAseq mappings.")
     (home-page "http://github.com/wwood/dirseq")
     (license license:expat)))
+
+(define-public python2-genometreetk
+  (package
+  (name "python2-genometreetk")
+  (version "0.0.21")
+  (source
+    (origin
+      (method url-fetch)
+      (uri (pypi-uri "GenomeTreeTk" version))
+      (sha256
+        (base32
+          "0yb4q9vhybgcl83c6r5x7fbaf2sr2xpxwp9vkwd2iqbi57ki3l5v"))))
+  (build-system python-build-system)
+  (arguments
+   `(#:python ,python-2 ; Python 2 only.
+     #:phases
+     (modify-phases %standard-phases
+       (replace 'check
+         (lambda _
+           ;; There are no tests, do a simple import test.
+           (setenv "PYTHONPATH" (string-append (getenv "PYTHONPATH") ":."))
+           (zero? (system* "bin/genometreetk" "-h")))))))
+  (inputs
+   `(("python-setuptools" ,python2-setuptools)
+     ("python-numpy" ,python2-numpy)
+     ("python-dendropy" ,python2-dendropy-untested)
+     ("python-biolib" ,python2-biolib)))
+  (home-page
+    "http://pypi.python.org/pypi/genometreetk/")
+  (synopsis "A toolbox for working with genome trees.")
+  (description
+    "A toolbox for working with genome trees.")
+  (license license:gpl3)))
+
+(define-public python2-biolib
+  (package
+    (name "python2-biolib")
+    (version "0.0.26")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (pypi-uri "biolib" version))
+       (sha256
+        (base32
+         "0crs8134fycb2mr5d70jjxhk889cmwx2vch81qp28vf6jwkciwy2"))))
+    (build-system python-build-system)
+    (arguments
+     `(#:python ,python-2 ; Python 2 only.
+       #:tests? #f)) ; No tests, and imported into genomtreetk.
+    (inputs
+     `(("python-setuptools" ,python2-setuptools)))
+    (home-page "http://pypi.python.org/pypi/biolib/")
+    (synopsis "Library for common tasks in bioinformatics")
+    (description
+     "Package for common tasks in bioinformatic.") ;fixme
+    (license license:gpl3)))
+
+(define-public python2-dendropy-untested
+  (package
+    (inherit python2-dendropy)
+    (arguments
+     `(#:python ,python-2
+        #:tests? #f))))
