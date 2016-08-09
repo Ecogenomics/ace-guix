@@ -75,9 +75,9 @@ ORF predicted and provide gene-wise coverages using DNAseq mappings.")
     (home-page "http://github.com/wwood/dirseq")
     (license license:expat)))
 
-(define-public python2-genometreetk
+(define-public genometreetk
   (package
-  (name "python2-genometreetk")
+  (name "genometreetk")
   (version "0.0.21")
   (source
     (origin
@@ -95,12 +95,23 @@ ORF predicted and provide gene-wise coverages using DNAseq mappings.")
          (lambda _
            ;; There are no tests, do a simple import test.
            (setenv "PYTHONPATH" (string-append (getenv "PYTHONPATH") ":."))
-           (zero? (system* "bin/genometreetk" "-h")))))))
+           (zero? (system* "bin/genometreetk" "-h"))))
+       (add-after 'install 'wrap-binary
+          (lambda* (#:key outputs #:allow-other-keys)
+            (let* ((out  (assoc-ref outputs "out"))
+                   (bin  (string-append out "/bin/"))
+                   (path (getenv "PATH")))
+              (wrap-program (string-append bin "/genometreetk")
+                `("PATH" ":" prefix
+                  (,path))))
+            #t)))))
   (inputs
    `(("python-setuptools" ,python2-setuptools)
      ("python-numpy" ,python2-numpy)
      ("python-dendropy" ,python2-dendropy-untested)
-     ("python-biolib" ,python2-biolib)))
+     ("python-biolib" ,python2-biolib)
+     ("fasttree" ,fasttree)
+     ("hmmer" ,hmmer)))
   (home-page
     "http://pypi.python.org/pypi/genometreetk/")
   (synopsis "A toolbox for working with genome trees.")
