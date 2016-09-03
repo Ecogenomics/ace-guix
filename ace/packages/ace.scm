@@ -28,6 +28,7 @@
   #:use-module (guix packages)
   #:use-module (guix download)
   #:use-module (guix utils)
+  #:use-module (guix build-system gnu)
   #:use-module (guix build-system python)
   #:use-module (guix build-system ruby))
   
@@ -154,28 +155,67 @@ ORF predicted and provide gene-wise coverages using DNAseq mappings.")
 ;; packaged.
 (define-public checkm
   (package
-   (name "checkm")
-   (version "1.0.5")
-   (source
-    (origin
-     (method url-fetch)
-     (uri (pypi-uri "checkm-genome" version))
+    (name "checkm")
+    (version "1.0.7")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (pypi-uri "checkm-genome" version))
      (sha256
       (base32
-       "13cm0401y4wvhyx0bxpfac0y3nkyx0y1b2w07mmvsiiw1dbqv870"))))
+       "02yhn3rvvhj63gj16hkqqnp3xbd9sikgc7pwpay2jd2vihjkiw4b"))))
    (build-system python-build-system)
    (arguments
     `(#:python ,python-2
       #:phases
       (modify-phases %standard-phases
-        (replace 'check
-                 (zero? (system* "bin/checkm" "test" "checkm_test_results"))))))
+        (add-after 'build 'set-data-root
+          (lambda* (#:key inputs #:allow-other-keys)
+            (substitute* "checkm/DATA_CONFIG"
+              (("dataRoot\": \"")
+               (string-append
+                "dataRoot\": \""
+                (assoc-ref inputs
+                           "checkm-data"))))))
+        (delete 'check)
+        (add-after 'install 'set-data-and-check
+          (lambda* (#:key inputs outputs #:allow-other-keys)
+            (setenv "PYTHONPATH" (string-append
+                                  (getenv "PYTHONPATH")
+                                  ":" (assoc-ref outputs "out")
+                                  "/lib/python"
+                                  (string-take (string-take-right
+                                                (assoc-ref inputs "python") 5) 3)
+                                  "/site-packages"))
+            ;; Cannot use the below command due to bug in CheckM
+            ;; https://github.com/Ecogenomics/CheckM/issues/58
+            ;; (zero?
+            ;;  (system* (string-append (assoc-ref outputs "out") "/bin/checkm")
+            ;;           "setRoot"
+            ;;           (assoc-ref inputs "checkm-data")))
+
+            (zero?
+             ;; Use a simple import: the 'test' procedure uses too much RAM.
+             ;; (system* (string-append (assoc-ref outputs "out") "/bin/checkm")
+             ;;         "test"
+             ;;          "checkm_test_results")))))))
+             (system* (string-append (assoc-ref outputs "out") "/bin/checkm")
+                      "-h")))))))
    (native-inputs
     `(("python2-setuptools" ,python2-setuptools)))
+   (inputs
+    `(("checkm-data" ,checkm-data)))
    (propagated-inputs
+    ;; FIXME: replace calls to hmmer, prodigal and pplacer in the scripts so
+    ;; that they can be inputs rather than propagated-inputs.
     `(("hmmer" ,hmmer)
       ("prodigal" ,prodigal)
-      ("pplacer" ,pplacer)))
+      ("pplacer" ,pplacer)
+      ("python2-numpy" ,python2-numpy)
+      ("python2-matplotlib" ,python2-matplotlib)
+      ("python2-pysam" ,python2-pysam)
+      ("python2-dendropy" ,python2-dendropy)
+      ("python2-screaming-backpack" ,python2-screaming-backpack)))
    (home-page "https://ecogenomics.github.io/CheckM")
    (synopsis "Assess the quality of putative genome bins")
    (description
@@ -184,3 +224,66 @@ recovered from isolates, single cells, or metagenomes.  It provides robust
 estimates of genome completeness and contamination by using collocated sets of
 genes that are ubiquitous and single-copy within a phylogenetic lineage.")
    (license license:gpl3+)))
+
+(define-public checkm-data
+  (package
+    (name "checkm-data")
+    (version "1.0.6")
+    (source (origin
+              (method url-fetch/tarbomb)
+              (uri (string-append
+                    "https://data.ace.uq.edu.au/public/CheckM_databases/checkm_data_v"
+                    version ".tar.gz"))
+              (file-name (string-append name "-" version ".tar.gz"))
+              (sha256
+               (base32
+                "0b69dbw3a3wl8ck8kh86z8836i0jgxb2y54nxgcw7mlb6ilw87lp"))))
+    (build-system gnu-build-system)
+    (arguments
+     `(#:phases
+       (modify-phases %standard-phases
+         (delete 'configure)
+         (delete 'build)
+         (delete 'check)
+         (replace 'install
+           (lambda* (#:key outputs #:allow-other-keys)
+             (copy-recursively "." (assoc-ref outputs "out")))))))
+    (synopsis "Data for CheckM")
+    (description
+     "Data for CheckM")
+    (home-page "https://ecogenomics.github.io/CheckM")
+    (license license:gpl3+)))
+
+;; Only used for checkm, so not contributed to main Guix repository until checkm
+;; is.  Do not define-public as it is only used by CheckM, at least for the
+;; moment.
+(define python2-screaming-backpack
+  (package-with-python2 ; python2 only
+   (package
+     (name "python-screaming-backpack")
+     (version "0.2.333")
+     (source
+      (origin
+        (method url-fetch)
+        (uri (pypi-uri "ScreamingBackpack" version))
+        (sha256
+         (base32
+          "02larxvivbd2qkrlmcaynvf027ah018rwvqfwgnqkh1ywxk2phq8"))))
+     (build-system python-build-system)
+     (arguments
+      `(#:phases
+        (modify-phases %standard-phases
+          ;; No tests, simply run the binary to check nothing is too bad.
+          (replace 'check
+            (lambda _
+              (setenv "PYTHONPATH"
+                      (string-append
+                       (getenv "PYTHONPATH") ":."))
+               (zero? (system* "bin/screamingBackpack" "-h")))))))
+     (native-inputs
+      `(("python2-setuptools" ,python2-setuptools)))
+     (home-page
+      "http://pypi.python.org/pypi/ScreamingBackpack/")
+     (synopsis "ScreamingBackpack")
+     (description "ScreamingBackpack")
+     (license license:gpl3+))))
