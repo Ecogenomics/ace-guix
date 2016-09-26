@@ -22,6 +22,7 @@
 (define-module (ace packages ace)
   #:use-module (ace packages external)
   #:use-module (gnu packages bioinformatics)
+  #:use-module (gnu packages python)
   #:use-module (gnu packages ruby)
   #:use-module ((guix licenses) #:prefix license:)
   #:use-module (guix packages)
@@ -508,7 +509,6 @@ units (OTUs) directly from shotgun metagenome data, without heavy reliance of
 reference sequence databases.  It is able to differentiate closely related
 species even if those species are from lineages new to science.")
     (license license:gpl3+)))
-
 
 ;; Cannot be contributed to the main Guix repository until pplacer has been
 ;; packaged.
