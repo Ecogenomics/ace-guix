@@ -587,7 +587,7 @@ genes that are ubiquitous and single-copy within a phylogenetic lineage.")
 (define-public checkm-data
   (package
     (name "checkm-data")
-    (version "1.0.6")
+    (version "1.0.7")
     (source (origin
               (method url-fetch/tarbomb)
               (uri (string-append
