@@ -32,7 +32,7 @@
 (define-public pplacer
   (package
     (name "pplacer")
-    (version "1.1.alpha17")
+    (version "1.1.alpha19")
     (source
      (origin
        (method url-fetch)
@@ -44,7 +44,7 @@
                        ".zip"))
        (sha256
         (base32
-         "0z2kccmqbxwnyarc11cgxjmq1hgjdpizjnyympd02bb4m07y5j1x"))))
+         "0z9ljalh68y2912wsd22fbzdzxaaysf18prqcvw2gffx6mfb8cci"))))
     (build-system gnu-build-system)
     (arguments
      `(#:phases

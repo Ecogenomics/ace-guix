@@ -28,6 +28,7 @@
   #:use-module (guix packages)
   #:use-module (guix download)
   #:use-module (guix git-download)
+  #:use-module (guix gexp)
   #:use-module (guix utils)
   #:use-module (guix build-system gnu)
   #:use-module (guix build-system ruby)
@@ -39,7 +40,7 @@
   #:use-module (gnu packages python)
   #:use-module (gnu packages xml)
   #:use-module (gnu packages web))
-  
+
 ;;; This package seems to work, and could be submitted to guix-devel in future.
 (define-public dirseq
   (package
@@ -118,7 +119,7 @@ ORF predicted and provide gene-wise coverages using DNAseq mappings.")
   (inputs
    `(("python-setuptools" ,python2-setuptools)
      ("python-numpy" ,python2-numpy)
-     ("python-dendropy" ,python2-dendropy-untested)
+     ("python-dendropy" ,python2-dendropy)
      ("python-biolib" ,python2-biolib)
      ("fasttree" ,fasttree)
      ("hmmer" ,hmmer)))
@@ -152,41 +153,20 @@ ORF predicted and provide gene-wise coverages using DNAseq mappings.")
      "Package for common tasks in bioinformatic.") ;fixme
     (license license:gpl3)))
 
-(define-public python2-dendropy-untested
-  (package
-    (inherit python2-dendropy)
-    (arguments
-     `(#:python ,python-2
-        #:tests? #f))))
-
 (define-public graftm
-  (let ((commit "099c45afc85be3661fbbc6d33f91f3f037e11798"))
+  (let ((commit "a64a2b7ed83e98546ac2c4e7b3218245ef84f852"))
     (package
       (name "graftm")
-      (version (string-append "0.9.5-1." (string-take commit 7)))
-      
-      ;; (source
-      ;;  (local-file "/home/ben/git/graftM" #:recursive? #t))
-
-      ;; (origin
-      ;;   (method url-fetch)
-      ;;   (uri (string-append
-      ;;         "https://pypi.python.org/packages/source/g/graftm/graftm-"
-      ;;         version
-      ;;         ".tar.gz"))
-      ;;   (sha256
-      ;;    (base32
-      ;;     "0wy4w2jvh6ip6ari0m55zvkyg3vnvsyn2l93n85d1d2xndbgns2v"))))
-      
+      (version (string-append "0.9.5-2." (string-take commit 7)))
       (source (origin
                 (method git-fetch)
                 (uri (git-reference
-                      (url "https://github.com/wwood/graftM.git")
+                      (url "https://github.com/geronimp/graftM.git")
                       (commit commit)))
                 (file-name (string-append name "-" version "-checkout"))
                 (sha256
                  (base32
-                  "1y40c2h9pdskkgr9526zakm9h9j874abr6jzln2437rppss11a63"))))
+                  "0y2b90fh42xdjim29jzja611828yml0vnwv9h181wsdvw8yy82hh"))))
       (build-system python-build-system)
       (arguments
        `(#:python ,python-2 ; python-2 only
@@ -222,7 +202,7 @@ ORF predicted and provide gene-wise coverages using DNAseq mappings.")
          ("python-extern" ,python2-extern)
          ("python-h5py" ,python2-h5py)
          ("python-tempdir" ,python2-tempdir)
-         ("python-dendropy" ,python2-dendropy-untested)
+         ("python-dendropy" ,python2-dendropy)
          ("orfm" ,orfm)
          ("hmmer" ,hmmer)
          ("diamond" ,diamond-0.7.9) ; Test data is made with an old diamond version.
@@ -242,7 +222,7 @@ marker genes using hidden Markov models or sequence similarity search, and
 classify these reads by placement into phylogenetic trees")
       (license license:gpl3+))))
 
-(define diamond-0.7.9
+(define-public diamond-0.7.9
   (package
     (inherit diamond)
     (name "diamond")
@@ -401,10 +381,10 @@ the description of the error.")
 
 (define-public python2-pytest-timeout
   (package-with-python2 python-pytest-timeout))
- 
+
 (define-public python2-subprocess32
   (package
-  (name "python-subprocess32")
+  (name "python2-subprocess32")
   (version "3.2.6")
   (source
     (origin
@@ -435,12 +415,9 @@ the description of the error.")
 (define-public singlem
   (package
     (name "singlem")
-    (version "0.6.2")
-    ;;(source
-    ;; (local-file "/home/ben/git/singlem_no_db" #:recursive? #t))
+    (version "0.7.0")
     ;; (source
-    ;;  (local-file "/home/ben/git/singlem/dist/singlem-0.6.2.tar.gz"))
-
+    ;; (local-file "/home/ben/git/singlem/dist/singlem-0.7.0.tar.gz"))
     (source (origin
               (method url-fetch)
               (uri (string-append
@@ -448,8 +425,7 @@ the description of the error.")
                     version "/singlem-" version ".tar.gz"))
               (sha256
                (base32
-                "1mng0196zvzx0s95z4vc1hyjpwizhxkjh2nbag5p9gm2a8jzv20h"))))
-    
+                "0fka94y832hbxrc9qzk1q341bhvq4crfxj9x5vn726jbsziz822p"))))
     (build-system python-build-system)
     (arguments
      `(#:python ,python-2 ; python-2 only
@@ -489,7 +465,7 @@ the description of the error.")
        ("python-biopython" ,python2-biopython)
        ("python-extern" ,python2-extern)
        ("python-tempdir" ,python2-tempdir)
-       ("python-dendropy" ,python2-dendropy-untested)
+       ("python-dendropy" ,python2-dendropy)
        ("python-subprocess32" ,python2-subprocess32)
        ("python-biom-format" ,python2-biom-format)
        ("python-h5py" ,python2-h5py)
@@ -499,8 +475,7 @@ the description of the error.")
        ("krona-tools" ,krona-tools)
        ("fxtract" ,fxtract)
        ("hmmer" ,hmmer)
-       ;; Diamond dbs are out of date.
-       ("diamond" ,diamond-0.7.9)))
+       ("diamond" ,diamond)))
     (home-page "http://github.com/wwood/singlem")
     (synopsis "De-novo OTUs from shotgun metagenomes")
     (description
@@ -573,7 +548,7 @@ species even if those species are from lineages new to science.")
       ("python2-numpy" ,python2-numpy)
       ("python2-matplotlib" ,python2-matplotlib)
       ("python2-pysam" ,python2-pysam)
-      ("python2-dendropy" ,python2-dendropy-untested)
+      ("python2-dendropy" ,python2-dendropy)
       ("python2-screaming-backpack" ,python2-screaming-backpack)))
    (home-page "https://ecogenomics.github.io/CheckM")
    (synopsis "Assess the quality of putative genome bins")
