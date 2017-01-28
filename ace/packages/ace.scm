@@ -322,17 +322,14 @@ classify these reads by placement into phylogenetic trees")
                                         ; would need to test the software.
   (package
     (name "python2-extern")
-    (version "0.1.0")
+    (version "0.2.0")
     (source
      (origin
        (method url-fetch)
-       (uri (string-append
-             "https://pypi.python.org/packages/source/e/extern/extern-"
-             version
-             ".tar.gz"))
+       (uri (pypi-uri "extern" version))
        (sha256
         (base32
-         "0fc5s17nsz9dzgknkn18j6ib4w1cqhxw7m3vqqq0xv9w89gvfyj2"))))
+         "01s0bgjjlsm0if3ha5cmz57zp56m2hdqwzcxigq0sy6lsglzkywl"))))
     (build-system python-build-system)
     (arguments
      `(#:python ,python-2
