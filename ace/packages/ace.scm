@@ -317,30 +317,22 @@ classify these reads by placement into phylogenetic trees")
      "Tools for taxonomic naming and annotation")
     (license license:gpl3)))
 
-(define-public python2-extern ; could be sent to the mailing list. Does it work
-                                        ; with python3 though? Probably, but
-                                        ; would need to test the software.
+(define-public python2-extern
   (package
     (name "python2-extern")
-    (version "0.2.0")
+    (version "0.2.1")
     (source
      (origin
        (method url-fetch)
        (uri (pypi-uri "extern" version))
        (sha256
         (base32
-         "01s0bgjjlsm0if3ha5cmz57zp56m2hdqwzcxigq0sy6lsglzkywl"))))
+         "04p51rw84n84fa9kndz9a9zfniqsnswjmp5wajz7zc7064896yxm"))))
     (build-system python-build-system)
     (arguments
-     `(#:python ,python-2
-       #:phases
-       (modify-phases %standard-phases
-         ;; current test in setup.py does not work as of 0.9.4,
-         ;; so use nose to run tests instead for now.
-         (replace 'check (lambda _ (zero? (system* "nosetests")))))))
+     `(#:python ,python-2)) ; python-2 only.
     (native-inputs
-     `(("python-setuptools" ,python2-setuptools)
-       ("python-nose" ,python2-nose)))
+     `(("python-setuptools" ,python2-setuptools)))
     (home-page "https://github.com/wwood/extern")
     (synopsis "Subprocess-related functions for ease of use")
     (description "Extern is an opinionated version of Python's subprocess, making
