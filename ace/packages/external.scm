@@ -26,9 +26,8 @@
   #:use-module (guix utils)
   #:use-module (guix build-system gnu))
 
-;;; Building from source is difficult given the package is built from an
-;;; outdated version of OCaml so we cannot submit this to be a part of Guix
-;;; proper just yet.
+;;; Right now only binaries are distributed, see
+;;; https://github.com/matsen/pplacer/issues/354
 (define-public pplacer
   (package
     (name "pplacer")

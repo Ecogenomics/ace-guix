@@ -21,6 +21,7 @@
 
 (define-module (ace packages ace)
   #:use-module (ace packages external)
+  #:use-module (gnu packages)
   #:use-module (gnu packages bioinformatics)
   #:use-module (gnu packages python)
   #:use-module (gnu packages ruby)
@@ -154,111 +155,67 @@ ORF predicted and provide gene-wise coverages using DNAseq mappings.")
     (license license:gpl3)))
 
 (define-public graftm
-  (let ((commit "a64a2b7ed83e98546ac2c4e7b3218245ef84f852"))
-    (package
-      (name "graftm")
-      (version (string-append "0.9.5-2." (string-take commit 7)))
-      (source (origin
-                (method git-fetch)
-                (uri (git-reference
-                      (url "https://github.com/geronimp/graftM.git")
-                      (commit commit)))
-                (file-name (string-append name "-" version "-checkout"))
-                (sha256
-                 (base32
-                  "0y2b90fh42xdjim29jzja611828yml0vnwv9h181wsdvw8yy82hh"))))
-      (build-system python-build-system)
-      (arguments
-       `(#:python ,python-2 ; python-2 only
-         #:phases
-         (modify-phases %standard-phases
-           ;; current test in setup.py does not work so use nose to run tests
-           ;; instead for now.
-           (replace 'check
-             (lambda _
-               ;(setenv "TEMPDIR" "/tmp") ; not sure if this is needed. 
-               (setenv "PATH" (string-append (getcwd) "/bin:" (getenv "PATH")))
-               ;(zero? (system* "python" "test/test_graft.py"))))
-               ;; Some tests fail for strange reasons which seem likely to do with
-               ;; being inside the chroot environment, rather than being actual
-               ;; software problems.
-               (delete-file "test/test_archive.py")
-               (delete-file "test/test_external_program_suite.py")
-               (zero? (system* "nosetests" "-vx"))))
-           (add-after 'install 'wrap-programs
-             (lambda* (#:key outputs #:allow-other-keys)
-               (let* ((out (assoc-ref outputs "out"))
-                      (graftm (string-append out "/bin/graftM"))
-                      (path (getenv "PATH")))
-                 (wrap-program graftm `("PATH" ":" prefix (,path))))
-               #t)))))
-      (native-inputs
-       `(("python-setuptools" ,python2-setuptools)
-         ("python-nose" ,python2-nose)))
-      (inputs
-       `(("python-biopython" ,python2-biopython)
-         ("python-subprocess32" ,python2-subprocess32)
-         ("python-biom-format" ,python2-biom-format)
-         ("python-extern" ,python2-extern)
-         ("python-h5py" ,python2-h5py)
-         ("python-tempdir" ,python2-tempdir)
-         ("python-dendropy" ,python2-dendropy)
-         ("orfm" ,orfm)
-         ("hmmer" ,hmmer)
-         ("diamond" ,diamond-0.7.9) ; Test data is made with an old diamond version.
-         ("fxtract" ,fxtract)
-         ("fasttree" ,fasttree)
-         ("krona-tools" ,krona-tools)
-         ("pplacer" ,pplacer)
-         ("seqmagick" ,seqmagick)
-         ("taxtastic" ,taxtastic)
-         ("mafft" ,mafft)))
-      (home-page "http://geronimp.github.com/graftM")
-      (synopsis "Identify and classify metagenomic marker gene reads")
-      (description
-       "GraftM is a pipeline used for identifying and classifying marker gene
+  (package
+    (name "graftm")
+    (version "0.10.1")
+    (source (origin
+              (method url-fetch)
+              (uri (pypi-uri "graftm" version))
+              (sha256
+               (base32
+                "15nfgcs2smbmsb06hjkck0qc6b91sg9p3wya405iwxp3wvarjbv2"))))
+    (build-system python-build-system)
+    (arguments
+     `(#:python ,python-2 ; python-2 only
+       #:phases
+       (modify-phases %standard-phases
+         ;; current test in setup.py does not work so use nose to run tests
+         ;; instead for now.
+         (replace 'check
+           (lambda _
+             (setenv "PATH" (string-append (getcwd) "/bin:" (getenv "PATH")))
+             ;; Some tests fail for strange reasons which seem likely to do with
+             ;; being inside the chroot environment, rather than being actual
+             ;; software problems.
+             (delete-file "test/test_archive.py")
+             (delete-file "test/test_external_program_suite.py")
+             (zero? (system* "nosetests" "-v"))))
+         (add-after 'install 'wrap-programs
+           (lambda* (#:key outputs #:allow-other-keys)
+             (let* ((out (assoc-ref outputs "out"))
+                    (graftm (string-append out "/bin/graftM"))
+                    (path (getenv "PATH")))
+               (wrap-program graftm `("PATH" ":" prefix (,path))))
+             #t)))))
+    (native-inputs
+     `(("python-setuptools" ,python2-setuptools)
+       ("python-nose" ,python2-nose)))
+    (inputs
+     `(("python-biopython" ,python2-biopython)
+       ("python-subprocess32" ,python2-subprocess32)
+       ("python-biom-format" ,python2-biom-format)
+       ("python-extern" ,python2-extern)
+       ("python-h5py" ,python2-h5py)
+       ("python-tempdir" ,python2-tempdir)
+       ("python-dendropy" ,python2-dendropy)
+       ("orfm" ,orfm)
+       ("hmmer" ,hmmer)
+       ("diamond" ,diamond)
+       ("fxtract" ,fxtract)
+       ("fasttree" ,fasttree)
+       ("krona-tools" ,krona-tools)
+       ("pplacer" ,pplacer)
+       ("seqmagick" ,seqmagick)
+       ("taxtastic" ,taxtastic)
+       ("mafft" ,mafft)))
+    (home-page "http://geronimp.github.com/graftM")
+    (synopsis "Identify and classify metagenomic marker gene reads")
+    (description
+     "GraftM is a pipeline used for identifying and classifying marker gene
 reads from large metagenomic shotgun sequence datasets.  It is able to find
 marker genes using hidden Markov models or sequence similarity search, and
 classify these reads by placement into phylogenetic trees")
-      (license license:gpl3+))))
-
-(define-public diamond-0.7.9
-  (package
-    (inherit diamond)
-    (name "diamond")
-    (version "0.7.9")
-    (source (origin
-              (method url-fetch)
-              (uri (string-append
-                    "https://github.com/bbuchfink/diamond/archive/v"
-                    version ".tar.gz"))
-              (file-name (string-append name "-" version ".tar.gz"))
-              (sha256
-               (base32
-                "0hfkcfv9f76h5brbyw9fyvmc0l9cmbsxrcdqk0fa9xv82zj47p15"))))
-    (build-system gnu-build-system)
-    (arguments
-     '(#:tests? #f  ;no "check" target
-       #:phases
-       (modify-phases %standard-phases
-         (add-after 'unpack 'enter-source-dir
-                    (lambda _
-                      (chdir "src")
-                      #t))
-         (delete 'configure)
-         (replace 'install
-                  (lambda* (#:key outputs #:allow-other-keys)
-                    (let ((bin (string-append (assoc-ref outputs "out")
-                                              "/bin")))
-                      (mkdir-p bin)
-                      (copy-file "../bin/diamond"
-                                 (string-append bin "/diamond"))
-                      #t))))))
-    (native-inputs
-     `(("bc" ,bc)))
-    (inputs
-     `(("boost" ,boost)
-       ("zlib" ,zlib)))))
+    (license license:gpl3+)))
 
 (define-public python-tempdir
   (package
@@ -404,31 +361,18 @@ the description of the error.")
 (define-public singlem
   (package
     (name "singlem")
-    (version "0.7.0")
-    ;; (source
-    ;; (local-file "/home/ben/git/singlem/dist/singlem-0.7.0.tar.gz"))
+    (version "0.7.1")
     (source (origin
               (method url-fetch)
-              (uri (string-append
-                    "https://github.com/wwood/singlem/releases/download/v"
-                    version "/singlem-" version ".tar.gz"))
+              (uri (pypi-uri "singlem" version))
               (sha256
                (base32
-                "0fka94y832hbxrc9qzk1q341bhvq4crfxj9x5vn726jbsziz822p"))))
+                "0cpvkq53vyglb4db32lxk5fb24fbnx5bxmzc44943ayhd7brl4kf"))))
     (build-system python-build-system)
     (arguments
      `(#:python ,python-2 ; python-2 only
        #:phases
        (modify-phases %standard-phases
-         (add-after 'unpack 'remove-graftm-dependency
-           (lambda _
-             ;; GraftM 0.9.5 requires scikit-bio 0.2.2, which pulls in
-             ;; a bunch of dependencies.  Since there is no released
-             ;; version of GraftM after this, do not include it as a
-             ;; dependency.
-             (substitute* "setup.py"
-               (("'graftm >=.*") ""))
-             #t))
          ;; (replace 'check
          ;;          (lambda _
          ;;            ;; (zero? (system* "bin/singlem" "--debug" "pipe" "--sequences"
