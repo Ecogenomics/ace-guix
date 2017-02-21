@@ -467,15 +467,21 @@ species even if those species are from lineages new to science.")
              ;;         "test"
              ;;          "checkm_test_results")))))))
              (system* (string-append (assoc-ref outputs "out") "/bin/checkm")
-                      "-h")))))))
+                      "-h"))))
+        (add-after 'install 'wrap-program
+          (lambda* (#:key outputs #:allow-other-keys)
+            (let* ((out (assoc-ref outputs "out"))
+                   (checkm (string-append out "/bin/checkm"))
+                   (path (getenv "PATH"))
+                   (pythonpath (getenv "PYTHONPATH")))
+              (wrap-program checkm `("PATH" ":" prefix (,path)))
+              (wrap-program checkm `("PYTHONPATH" ":" prefix (,pythonpath))))
+            #t)))))
    (native-inputs
     `(("python2-setuptools" ,python2-setuptools)))
    (inputs
-    `(("checkm-data" ,checkm-data)))
-   (propagated-inputs
-    ;; FIXME: replace calls to hmmer, prodigal and pplacer in the scripts so
-    ;; that they can be inputs rather than propagated-inputs.
-    `(("hmmer" ,hmmer)
+    `(("checkm-data" ,checkm-data)
+      ("hmmer" ,hmmer)
       ("prodigal" ,prodigal)
       ("pplacer" ,pplacer)
       ("python2-numpy" ,python2-numpy)
