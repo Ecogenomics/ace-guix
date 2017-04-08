@@ -408,7 +408,10 @@ the description of the error.")
        ("krona-tools" ,krona-tools)
        ("fxtract" ,fxtract)
        ("hmmer" ,hmmer)
-       ("diamond" ,diamond)))
+       ("diamond" ,diamond)
+       ;; Include GraftM-specific dependencies too as GraftM is not installed as
+       ;; a library.
+       ("taxtastic" ,taxtastic)))
     (home-page "http://github.com/wwood/singlem")
     (synopsis "De-novo OTUs from shotgun metagenomes")
     (description
