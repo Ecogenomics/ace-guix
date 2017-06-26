@@ -19,7 +19,7 @@
 
 
 (define-module (ace packages external)
-  #:use-module (gnu packages zip)
+  #:use-module (gnu packages compression)
   #:use-module ((guix licenses) #:prefix license:)
   #:use-module (guix packages)
   #:use-module (guix download)

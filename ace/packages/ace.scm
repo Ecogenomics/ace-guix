@@ -40,7 +40,8 @@
   #:use-module (gnu packages compression)
   #:use-module (gnu packages python)
   #:use-module (gnu packages xml)
-  #:use-module (gnu packages web))
+  #:use-module (gnu packages web)
+  #:use-module (ice-9 regex))
 
 ;;; This package seems to work, and could be submitted to guix-devel in future.
 (define-public dirseq
@@ -56,7 +57,11 @@
          "1fixvy3zapl16x71nlsra2g1c3lgf220rmqs5d0llpcd0k4b7hjf"))))
     (build-system ruby-build-system)
     (arguments
-     `(#:phases
+     `(#:modules ((srfi srfi-1)
+                  (ice-9 regex)
+                  (guix build ruby-build-system)
+                  (guix build utils))
+       #:phases
        (modify-phases %standard-phases
          (add-before 'build 'patch-paths-to-inputs
            (lambda _
@@ -68,7 +73,24 @@
          ;; Call rspec directly so jeweler is not required.
          (replace 'check
            (lambda _
-             (zero? (system* "rspec" "spec/script_spec.rb")))))))
+             (zero? (system* "rspec" "spec/script_spec.rb"))))
+         (add-after 'install 'wrap
+           (lambda* (#:key outputs #:allow-other-keys)
+             (let* ((out (assoc-ref outputs "out"))
+                    (dirseq (string-append out "/bin/dirseq"))
+                    (dirseq-lib
+                     (string-append
+                      out
+                      "/lib/ruby/gems/"
+                      (regexp-substitute
+                       #f
+                       ,(string-match "^[0-9]+\\.[0-9]+" (package-version ruby))
+                       0 ".0")))
+                    (gem-path (string-append (getenv "GEM_PATH") ":" dirseq-lib))
+                    (path (getenv "PATH")))
+               (wrap-program dirseq `("GEM_PATH" ":" prefix (,gem-path)))
+               (wrap-program dirseq `("PATH" ":" prefix (,path))))
+             #t)))))
     (native-inputs
      `(("ruby-rspec" ,ruby-rspec-2)))
     (inputs
