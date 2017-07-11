@@ -28,45 +28,45 @@
 
 ;;; Right now only binaries are distributed, see
 ;;; https://github.com/matsen/pplacer/issues/354
-(define-public pplacer
-  (package
-    (name "pplacer")
-    (version "1.1.alpha19")
-    (source
-     (origin
-       (method url-fetch)
-       (uri
-        (string-append "https://github.com/matsen/pplacer/releases/download/v"
-                       version
-                       "/pplacer-Linux-v"
-                       version
-                       ".zip"))
-       (sha256
-        (base32
-         "0z9ljalh68y2912wsd22fbzdzxaaysf18prqcvw2gffx6mfb8cci"))))
-    (build-system gnu-build-system)
-    (arguments
-     `(#:phases
-       (modify-phases %standard-phases
-         (delete 'configure)
-         (delete 'build)
-         (replace 'check ; this is just a binary, so run rudimentary check.
-           (lambda _ (zero? (system* "./pplacer" "--help"))))
-         (replace 'install
-           (lambda* (#:key outputs #:allow-other-keys)
-             (let ((bin (string-append (assoc-ref outputs "out") "/bin/")))
-               (install-file "pplacer" bin)
-               (install-file "guppy" bin)
-               (install-file "rppr" bin))
-             #t)))))
-    (native-inputs
-     `(("unzip" ,unzip)))
-    (synopsis "Place query sequences on a fixed reference phylogenetic tree")
-    (description
-     "Pplacer places query sequences on a fixed reference phylogenetic tree to
-maximize phylogenetic likelihood or posterior probability according to a
-reference alignment.  Pplacer is designed to be fast, to give useful information
-about uncertainty, and to offer advanced visualization and downstream
-analysis.")
-    (home-page "http://matsen.fhcrc.org/pplacer")
-    (license license:gpl3)))
+;; (define-public pplacer
+;;   (package
+;;     (name "pplacer")
+;;     (version "1.1.alpha19")
+;;     (source
+;;      (origin
+;;        (method url-fetch)
+;;        (uri
+;;         (string-append "https://github.com/matsen/pplacer/releases/download/v"
+;;                        version
+;;                        "/pplacer-Linux-v"
+;;                        version
+;;                        ".zip"))
+;;        (sha256
+;;         (base32
+;;          "0z9ljalh68y2912wsd22fbzdzxaaysf18prqcvw2gffx6mfb8cci"))))
+;;     (build-system gnu-build-system)
+;;     (arguments
+;;      `(#:phases
+;;        (modify-phases %standard-phases
+;;          (delete 'configure)
+;;          (delete 'build)
+;;          (replace 'check ; this is just a binary, so run rudimentary check.
+;;            (lambda _ (zero? (system* "./pplacer" "--help"))))
+;;          (replace 'install
+;;            (lambda* (#:key outputs #:allow-other-keys)
+;;              (let ((bin (string-append (assoc-ref outputs "out") "/bin/")))
+;;                (install-file "pplacer" bin)
+;;                (install-file "guppy" bin)
+;;                (install-file "rppr" bin))
+;;              #t)))))
+;;     (native-inputs
+;;      `(("unzip" ,unzip)))
+;;     (synopsis "Place query sequences on a fixed reference phylogenetic tree")
+;;     (description
+;;      "Pplacer places query sequences on a fixed reference phylogenetic tree to
+;; maximize phylogenetic likelihood or posterior probability according to a
+;; reference alignment.  Pplacer is designed to be fast, to give useful information
+;; about uncertainty, and to offer advanced visualization and downstream
+;; analysis.")
+;;     (home-page "http://matsen.fhcrc.org/pplacer")
+;;     (license license:gpl3)))

@@ -266,37 +266,6 @@ classify these reads by placement into phylogenetic trees")
 (define-public python2-tempdir
   (package-with-python2 (strip-python2-variant python-tempdir)))
 
-(define-public taxtastic
-  (package
-    (name "taxtastic")
-    (version "0.5.4")
-    (source
-     (origin
-       (method url-fetch)
-       (uri (string-append
-             "https://pypi.python.org/packages/source/t/taxtastic/taxtastic-"
-             version
-             ".tar.gz"))
-       (sha256
-        (base32
-         "1g7fgnl367njdsk2xify9qh20dy63xzamf6w3bi74isgbhykq00h"))))
-    (build-system python-build-system)
-    (arguments
-     `(#:python ,python-2))
-    (propagated-inputs
-     `(("python-sqlalchemy" ,python2-sqlalchemy)
-       ("python-decorator" ,python2-decorator)
-       ("python-biopython" ,python2-biopython)
-       ("python-xlrd" ,python2-xlrd)))
-    (inputs
-     `(("python-setuptools" ,python2-setuptools)))
-    (home-page "https://github.com/fhcrc/taxtastic")
-    (synopsis
-     "Tools for taxonomic naming and annotation")
-    (description
-     "Tools for taxonomic naming and annotation")
-    (license license:gpl3)))
-
 (define-public python2-extern
   (package
     (name "python2-extern")
@@ -350,36 +319,6 @@ the description of the error.")
 
 (define-public python2-pytest-timeout
   (package-with-python2 python-pytest-timeout))
-
-(define-public python2-subprocess32
-  (package
-  (name "python2-subprocess32")
-  (version "3.2.6")
-  (source
-    (origin
-      (method url-fetch)
-      (uri (string-append
-             "https://pypi.python.org/packages/source/s/subprocess32/subprocess32-"
-             version
-             ".tar.gz"))
-      (sha256
-        (base32
-          "1xi0qb9b70kgwa2ks4d4kkib7dmb9i30rl6zf9rpwb5ys9pd9x6x"))))
-  (build-system python-build-system)
-  (arguments
-   `(#:python ,python-2
-     #:tests? #f)) ; no check, and nosetests fails
-  (inputs
-    `(("python-setuptools" ,python2-setuptools)
-      ("python-nose" ,python2-nose)))
-  (home-page
-    "http://code.google.com/p/python-subprocess32/")
-  (synopsis
-    "Backport of the subprocess module from Python 3.2/3.3 for use on 2.x.")
-  (description
-    "Backport of the subprocess module from Python 3.2/3.3 for use on 2.x.")
-  (license license:psfl)))
-
 
 (define-public singlem
   (package
