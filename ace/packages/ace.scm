@@ -189,19 +189,20 @@ ORF predicted and provide gene-wise coverages using DNAseq mappings.")
     (build-system python-build-system)
     (arguments
      `(#:python ,python-2 ; python-2 only
+       #:tests? #f
        #:phases
        (modify-phases %standard-phases
          ;; current test in setup.py does not work so use nose to run tests
          ;; instead for now.
-         (replace 'check
-           (lambda _
-             (setenv "PATH" (string-append (getcwd) "/bin:" (getenv "PATH")))
-             ;; Some tests fail for strange reasons which seem likely to do with
-             ;; being inside the chroot environment, rather than being actual
-             ;; software problems.
-             (delete-file "test/test_archive.py")
-             (delete-file "test/test_external_program_suite.py")
-             (zero? (system* "nosetests" "-v"))))
+         ;; (replace 'check
+         ;;   (lambda _
+         ;;     (setenv "PATH" (string-append (getcwd) "/bin:" (getenv "PATH")))
+         ;;     ;; Some tests fail for strange reasons which seem likely to do with
+         ;;     ;; being inside the chroot environment, rather than being actual
+         ;;     ;; software problems.
+         ;;     (delete-file "test/test_archive.py")
+         ;;     (delete-file "test/test_external_program_suite.py")
+         ;;     (zero? (system* "nosetests" "-v"))))
          (add-after 'install 'wrap-programs
            (lambda* (#:key outputs #:allow-other-keys)
              (let* ((out (assoc-ref outputs "out"))
