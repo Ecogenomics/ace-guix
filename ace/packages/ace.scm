@@ -323,13 +323,13 @@ the description of the error.")
 (define-public singlem
   (package
     (name "singlem")
-    (version "0.7.1")
+    (version "0.8.0")
     (source (origin
               (method url-fetch)
               (uri (pypi-uri "singlem" version))
               (sha256
                (base32
-                "0cpvkq53vyglb4db32lxk5fb24fbnx5bxmzc44943ayhd7brl4kf"))))
+                "1ljil6whcchffka577dy7fsvvh23j68zlnwbq6iv5syi1yci60kc"))))
     (build-system python-build-system)
     (arguments
      `(#:python ,python-2 ; python-2 only
