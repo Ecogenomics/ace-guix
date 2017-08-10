@@ -227,7 +227,7 @@ ORF predicted and provide gene-wise coverages using DNAseq mappings.")
        ("fxtract" ,fxtract)
        ("fasttree" ,fasttree)
        ("krona-tools" ,krona-tools)
-       ("pplacer" ,pplacer)
+       ("pplacer" ,pplacer-binary) ; Use binary because it fails when built from source, as seen on some SingleM runs.
        ("seqmagick" ,seqmagick)
        ("taxtastic" ,taxtastic)
        ("mafft" ,mafft)))
