@@ -214,14 +214,7 @@ ORF predicted and provide gene-wise coverages using DNAseq mappings.")
      `(("python-setuptools" ,python2-setuptools)
        ("python-nose" ,python2-nose)))
     (inputs
-     `(("python-biopython" ,python2-biopython)
-       ("python-subprocess32" ,python2-subprocess32)
-       ("python-biom-format" ,python2-biom-format)
-       ("python-extern" ,python2-extern)
-       ("python-h5py" ,python2-h5py)
-       ("python-tempdir" ,python2-tempdir)
-       ("python-dendropy" ,python2-dendropy)
-       ("orfm" ,orfm)
+     `(("orfm" ,orfm)
        ("hmmer" ,hmmer)
        ("diamond" ,diamond)
        ("fxtract" ,fxtract)
@@ -229,8 +222,16 @@ ORF predicted and provide gene-wise coverages using DNAseq mappings.")
        ("krona-tools" ,krona-tools)
        ("pplacer" ,pplacer-binary) ; Use binary because it fails when built from source, as seen on some SingleM runs.
        ("seqmagick" ,seqmagick)
-       ("taxtastic" ,taxtastic)
        ("mafft" ,mafft)))
+    (propagated-inputs
+     `(("taxtastic" ,taxtastic)
+       ("python-biopython" ,python2-biopython)
+       ("python-subprocess32" ,python2-subprocess32)
+       ("python-biom-format" ,python2-biom-format)
+       ("python-extern" ,python2-extern)
+       ("python-h5py" ,python2-h5py)
+       ("python-tempdir" ,python2-tempdir)
+       ("python-dendropy" ,python2-dendropy)))
     (home-page "http://geronimp.github.com/graftM")
     (synopsis "Identify and classify metagenomic marker gene reads")
     (description
@@ -323,28 +324,18 @@ the description of the error.")
 (define-public singlem
   (package
     (name "singlem")
-    (version "0.8.0")
+    (version "0.8.1")
     (source (origin
               (method url-fetch)
               (uri (pypi-uri "singlem" version))
               (sha256
                (base32
-                "1ljil6whcchffka577dy7fsvvh23j68zlnwbq6iv5syi1yci60kc"))))
+                "17kc78n9g78x5hifznf92g5al9wjqcf5l239jdc3mk96fmgh59yq"))))
     (build-system python-build-system)
     (arguments
      `(#:python ,python-2 ; python-2 only
        #:phases
        (modify-phases %standard-phases
-         ;; (replace 'check
-         ;;          (lambda _
-         ;;            ;; (zero? (system* "bin/singlem" "--debug" "pipe" "--sequences"
-         ;;            ;;                 "bla.fasta" "--otu_table" "stdout"
-         ;;            ;;                 "--singlem_packages"
-         ;;            ;;                 "test/data/4.11.22seqs.gpkg.spkg"))
-         ;;            ;; (system* "cat" "stdout")
-         ;;            ;;(zero? (system* "python" "test/test_pipe.py" "Tests.test_fast_protein_package"))))
-         ;;            (zero? (system* "nosetests" "-v"))))
-         ;;            ;;#t))
          (add-after 'install 'wrap-programs
            (lambda* (#:key outputs #:allow-other-keys)
              (let* ((out (assoc-ref outputs "out"))
@@ -356,6 +347,14 @@ the description of the error.")
      `(("python-setuptools" ,python2-setuptools)
        ("python-nose" ,python2-nose)))
     (inputs
+     `(("seqmagick" ,seqmagick)
+       ("blast+" ,blast+)
+       ("vsearch" ,vsearch)
+       ("krona-tools" ,krona-tools)
+       ("fxtract" ,fxtract)
+       ("hmmer" ,hmmer)
+       ("diamond" ,diamond)))
+    (propagated-inputs
      `(("graftm" ,graftm)
        ("python-biopython" ,python2-biopython)
        ("python-extern" ,python2-extern)
@@ -363,17 +362,7 @@ the description of the error.")
        ("python-dendropy" ,python2-dendropy)
        ("python-subprocess32" ,python2-subprocess32)
        ("python-biom-format" ,python2-biom-format)
-       ("python-h5py" ,python2-h5py)
-       ("seqmagick" ,seqmagick)
-       ("blast+" ,blast+)
-       ("vsearch" ,vsearch)
-       ("krona-tools" ,krona-tools)
-       ("fxtract" ,fxtract)
-       ("hmmer" ,hmmer)
-       ("diamond" ,diamond)
-       ;; Include GraftM-specific dependencies too as GraftM is not installed as
-       ;; a library.
-       ("taxtastic" ,taxtastic)))
+       ("python-h5py" ,python2-h5py)))
     (home-page "http://github.com/wwood/singlem")
     (synopsis "De-novo OTUs from shotgun metagenomes")
     (description
