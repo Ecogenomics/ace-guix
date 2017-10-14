@@ -35,7 +35,7 @@
 ;;; https://github.com/matsen/pplacer/issues/354
 (define-public pplacer-binary
   (package
-    (name "pplacer")
+    (name "pplacer-binary")
     (version "1.1.alpha19")
     (source
      (origin
