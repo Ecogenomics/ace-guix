@@ -37,6 +37,7 @@
   #:use-module (gnu packages algebra)
   #:use-module (gnu packages bioinformatics)
   #:use-module (gnu packages boost)
+  #:use-module (gnu packages check)
   #:use-module (gnu packages compression)
   #:use-module (gnu packages python)
   #:use-module (gnu packages xml)
