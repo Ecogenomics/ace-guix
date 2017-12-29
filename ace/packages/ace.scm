@@ -352,72 +352,71 @@ species even if those species are from lineages new to science.")
 (define-public checkm
   (package
     (name "checkm")
-    (version "1.0.8")
+    (version "1.0.10")
     (source
      (origin
        (method url-fetch)
        (uri (pypi-uri "checkm-genome" version))
      (sha256
       (base32
-       "1j4f4kk7mynk9g7kazpslqq750w9q0cqx80g6pv7r7hk232xqdcj"))))
+       "18dspxycfzmfy7jfl2bvpfv3qns4jmd7fsn8pgpk62dc0g40dnvz"))))
    (build-system python-build-system)
    (arguments
     `(#:python ,python-2
+      #:modules ((ice-9 popen)
+                 (guix build python-build-system)
+                 (guix build utils))
       #:phases
       (modify-phases %standard-phases
-        (add-after 'build 'set-data-root
-          (lambda* (#:key inputs #:allow-other-keys)
-            (substitute* "checkm/DATA_CONFIG"
-              (("dataRoot\": \"")
-               (string-append
-                "dataRoot\": \""
-                (assoc-ref inputs
-                           "checkm-data"))))))
         (delete 'check)
-        (add-after 'install 'set-data-and-check
-          (lambda* (#:key inputs outputs #:allow-other-keys)
-            (setenv "PYTHONPATH" (string-append
-                                  (getenv "PYTHONPATH")
-                                  ":" (assoc-ref outputs "out")
-                                  "/lib/python"
-                                  (string-take (string-take-right
-                                                (assoc-ref inputs "python") 5) 3)
-                                  "/site-packages"))
-            ;; Cannot use the below command due to bug in CheckM
-            ;; https://github.com/Ecogenomics/CheckM/issues/58
-            ;; (zero?
-            ;;  (system* (string-append (assoc-ref outputs "out") "/bin/checkm")
-            ;;           "setRoot"
-            ;;           (assoc-ref inputs "checkm-data")))
-
-            (zero?
-             ;; Use a simple import: the 'test' procedure uses too much RAM.
-             ;; (system* (string-append (assoc-ref outputs "out") "/bin/checkm")
-             ;;         "test"
-             ;;          "checkm_test_results")))))))
-             (system* (string-append (assoc-ref outputs "out") "/bin/checkm")
-                      "-h"))))
         (add-after 'install 'wrap-program
-          (lambda* (#:key outputs #:allow-other-keys)
+          (lambda* (#:key inputs outputs #:allow-other-keys)
             (let* ((out (assoc-ref outputs "out"))
                    (checkm (string-append out "/bin/checkm"))
                    (path (getenv "PATH"))
                    (pythonpath (getenv "PYTHONPATH")))
               (wrap-program checkm `("PATH" ":" prefix (,path)))
-              (wrap-program checkm `("PYTHONPATH" ":" prefix (,pythonpath))))
-            #t)))))
+              (wrap-program checkm `("PYTHONPATH" ":" prefix (,pythonpath)))
+            #t)))
+        (add-after 'wrap-program 'set-data-dir-and-check
+          (lambda* (#:key inputs outputs #:allow-other-keys)
+            (let* ((out      (assoc-ref outputs "out"))
+                   (data-dir (string-append out "/share/checkm/data")))
+              (setenv "PYTHONPATH" (string-append
+                                    (getenv "PYTHONPATH")
+                                    ":" (assoc-ref outputs "out")
+                                    "/lib/python"
+                                    (string-take (string-take-right
+                                                  (assoc-ref inputs "python") 5) 3)
+                                    "/site-packages"))
+
+              ;; Copy data to output directory
+              (copy-recursively (assoc-ref inputs "checkm-data") data-dir)
+              (chmod (string-append data-dir "/.dmanifest") #o644)
+
+              ;; Set data directory
+              (let ((port (open-output-pipe "bin/checkm data setData")))
+                (display data-dir port)
+                (display "\n" port)
+                (close-pipe port))
+              (zero?
+               ;; Use a simple import: the 'test' procedure uses too much RAM.
+               ;; (system* (string-append (assoc-ref outputs "out") "/bin/checkm")
+               ;;         "test"
+               ;;          "checkm_test_results")))))))
+               (system* (string-append (assoc-ref outputs "out") "/bin/checkm")
+                        "-h"))))))))
    (native-inputs
-    `(("python2-setuptools" ,python2-setuptools)))
+    `(("python2-setuptools" ,python2-setuptools)
+      ("checkm-data" ,checkm-data)))
    (inputs
-    `(("checkm-data" ,checkm-data)
-      ("hmmer" ,hmmer)
+    `(("hmmer" ,hmmer)
       ("prodigal" ,prodigal)
       ("pplacer" ,pplacer-binary)
       ("python2-numpy" ,python2-numpy)
       ("python2-matplotlib" ,python2-matplotlib)
       ("python2-pysam" ,python2-pysam)
-      ("python2-dendropy" ,python2-dendropy)
-      ("python2-screaming-backpack" ,python2-screaming-backpack)))
+      ("python2-dendropy" ,python2-dendropy)))
    (home-page "https://ecogenomics.github.io/CheckM")
    (synopsis "Assess the quality of putative genome bins")
    (description
@@ -430,7 +429,7 @@ genes that are ubiquitous and single-copy within a phylogenetic lineage.")
 (define-public checkm-data
   (package
     (name "checkm-data")
-    (version "1.0.7")
+    (version "1.0.9")
     (source (origin
               (method url-fetch/tarbomb)
               (uri (string-append
