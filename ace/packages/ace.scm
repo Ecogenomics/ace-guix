@@ -242,32 +242,6 @@ marker genes using hidden Markov models or sequence similarity search, and
 classify these reads by placement into phylogenetic trees")
     (license license:gpl3+)))
 
-(define-public python-tempdir
-  (package
-    (name "python-tempdir")
-    (version "0.7.1")
-    (source
-     (origin
-       (method url-fetch)
-       (uri (pypi-uri "tempdir" version))
-       (sha256
-        (base32
-         "13msyyxqbicr111a294x7fsqbkl6a31fyrqflx3q7k547gnq15k8"))))
-    (build-system python-build-system)
-    (inputs
-     `(("python-setuptools" ,python-setuptools)))
-    (home-page
-     "https://bitbucket.org/another_thomas/tempdir")
-    (synopsis
-     "Tempdirs are temporary directories, based on tempfile.mkdtemp")
-    (description
-     "Tempdirs are temporary directories, based on tempfile.mkdtemp")
-    (license expat)
-    (properties `((python2-variant . ,(delay python2-pytest-cache))))))
-
-(define-public python2-tempdir
-  (package-with-python2 (strip-python2-variant python-tempdir)))
-
 (define-public python2-extern
   (package
     (name "python2-extern")
