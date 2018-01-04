@@ -352,14 +352,14 @@ species even if those species are from lineages new to science.")
 (define-public checkm
   (package
     (name "checkm")
-    (version "1.0.10")
+    (version "1.0.11")
     (source
      (origin
        (method url-fetch)
        (uri (pypi-uri "checkm-genome" version))
      (sha256
       (base32
-       "18dspxycfzmfy7jfl2bvpfv3qns4jmd7fsn8pgpk62dc0g40dnvz"))))
+       "142i5a68kp60l26dqqajq9kzqhmpb1vz906cphfpgyhjgn0xjxg4"))))
    (build-system python-build-system)
    (arguments
     `(#:python ,python-2
