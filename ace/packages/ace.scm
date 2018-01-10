@@ -177,6 +177,45 @@ ORF predicted and provide gene-wise coverages using DNAseq mappings.")
      "Package for common tasks in bioinformatic.") ;fixme
     (license license:gpl3)))
 
+;; An outdated version of biopython is required for seqmagick, see
+;; https://github.com/fhcrc/seqmagick/issues/59
+;; When that issue has been resolved this package should be removed.
+(define python2-biopython-1.66
+  (package
+    (inherit python2-biopython)
+    (version "1.66")
+    (source (origin
+              (method url-fetch)
+              (uri (pypi-uri "biopython" version))
+              (sha256
+               (base32
+                "1gdv92593klimg22icf5j9by7xiq86jnwzkpz4abaa05ylkdf6hp"))))))
+
+(define python2-seqmagick-0.6.2
+  (package
+    (inherit seqmagick)
+    (version "0.6.2")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (pypi-uri "seqmagick" version))
+       (sha256
+        (base32
+         "0iz9jxb5idlza43h4a0h94bm4xwlhk25h5g2pbibbvgga3cn0122"))))
+    (arguments
+     ;; python2 only, see https://github.com/fhcrc/seqmagick/issues/56
+     `(#:python ,python-2
+       #:phases
+       (modify-phases %standard-phases
+         ;; Current test in setup.py does not work as of 0.6.1,
+         ;; so use nose to run tests instead for now. See
+         ;; https://github.com/fhcrc/seqmagick/issues/55
+         (replace 'check (lambda _ (zero? (system* "nosetests")))))))
+    (inputs
+     `(("python2-biopython" ,python2-biopython-1.66)))
+    (native-inputs
+     `(("python-nose" ,python2-nose)))))
+
 (define-public graftm
   (package
     (name "graftm")
@@ -190,20 +229,23 @@ ORF predicted and provide gene-wise coverages using DNAseq mappings.")
     (build-system python-build-system)
     (arguments
      `(#:python ,python-2 ; python-2 only
-       #:tests? #f
        #:phases
        (modify-phases %standard-phases
          ;; current test in setup.py does not work so use nose to run tests
          ;; instead for now.
-         ;; (replace 'check
-         ;;   (lambda _
-         ;;     (setenv "PATH" (string-append (getcwd) "/bin:" (getenv "PATH")))
-         ;;     ;; Some tests fail for strange reasons which seem likely to do with
-         ;;     ;; being inside the chroot environment, rather than being actual
-         ;;     ;; software problems.
-         ;;     (delete-file "test/test_archive.py")
-         ;;     (delete-file "test/test_external_program_suite.py")
-         ;;     (zero? (system* "nosetests" "-v"))))
+         (replace 'check
+           (lambda _
+             (setenv "PATH" (string-append (getcwd) "/bin:" (getenv "PATH")))
+             ;; Some tests fail for strange reasons which seem likely to do with
+             ;; being inside the chroot environment, rather than being actual
+             ;; software problems.
+             (delete-file "test/test_archive.py")
+             (delete-file "test/test_external_program_suite.py")
+             ;; Failures related to out of date DIAMOND databases
+             (delete-file "test/test_diamond.py")
+             (delete-file "test/test_expand_searcher.py")
+             (delete-file "test/test_graft.py")
+             (zero? (system* "nosetests" "-v"))))
          (add-after 'install 'wrap-programs
            (lambda* (#:key outputs #:allow-other-keys)
              (let* ((out (assoc-ref outputs "out"))
@@ -222,11 +264,11 @@ ORF predicted and provide gene-wise coverages using DNAseq mappings.")
        ("fasttree" ,fasttree)
        ("krona-tools" ,krona-tools)
        ("pplacer" ,pplacer-binary) ; Use binary because it fails when built from source, as seen on some SingleM runs.
-       ("seqmagick" ,seqmagick)
+       ("seqmagick" ,python2-seqmagick-0.6.2) ; Newer versions use python-3.
        ("mafft" ,mafft)))
     (propagated-inputs
      `(("taxtastic" ,taxtastic)
-       ("python-biopython" ,python2-biopython)
+       ("python-biopython" ,python2-biopython-1.66)
        ("python-subprocess32" ,python2-subprocess32)
        ("python-biom-format" ,python2-biom-format)
        ("python-extern" ,python2-extern)
