@@ -48,14 +48,14 @@
 (define-public dirseq
   (package
     (name "dirseq")
-    (version "0.1.0")
+    (version "0.2.0")
     (source
      (origin
        (method url-fetch)
        (uri (rubygems-uri "dirseq" version))
        (sha256
         (base32
-         "1fixvy3zapl16x71nlsra2g1c3lgf220rmqs5d0llpcd0k4b7hjf"))))
+         "0vljf9v9wfjmg7z9c2ib1c6nlq0kxpzsqwqfbh0c103c282kmxhz"))))
     (build-system ruby-build-system)
     (arguments
      `(#:modules ((srfi srfi-1)
@@ -74,23 +74,7 @@
          ;; Call rspec directly so jeweler is not required.
          (replace 'check
            (lambda _
-             (zero? (system* "rspec" "spec/script_spec.rb"))))
-         (add-after 'install 'wrap
-           (lambda* (#:key outputs #:allow-other-keys)
-             (let* ((out (assoc-ref outputs "out"))
-                    (dirseq (string-append out "/bin/dirseq"))
-                    (dirseq-lib
-                     (string-append
-                      out
-                      "/lib/ruby/gems/"
-                      (regexp-substitute
-                       #f
-                       ,(string-match "^[0-9]+\\.[0-9]+" (package-version ruby))
-                       0 ".0")))
-                    (gem-path (string-append (getenv "GEM_PATH") ":" dirseq-lib))
-                    (path (getenv "PATH")))
-               (wrap-program dirseq `("GEM_PATH" ":" prefix (,gem-path)))
-               (wrap-program dirseq `("PATH" ":" prefix (,path))))
+             (invoke "rspec" "spec/script_spec.rb")
              #t)))))
     (native-inputs
      `(("ruby-rspec" ,ruby-rspec-2)))
@@ -216,6 +200,9 @@ ORF predicted and provide gene-wise coverages using DNAseq mappings.")
     (native-inputs
      `(("python-nose" ,python2-nose)))))
 
+(define python2-biopython-1.66-instead-of-biopython
+  (package-input-rewriting `((,python2-biopython . ,python2-biopython-1.66))))
+
 (define-public graftm
   (package
     (name "graftm")
@@ -267,7 +254,7 @@ ORF predicted and provide gene-wise coverages using DNAseq mappings.")
        ("seqmagick" ,python2-seqmagick-0.6.2) ; Newer versions use python-3.
        ("mafft" ,mafft)))
     (propagated-inputs
-     `(("taxtastic" ,taxtastic)
+     `(("taxtastic" ,(python2-biopython-1.66-instead-of-biopython taxtastic))
        ("python-biopython" ,python2-biopython-1.66)
        ("python-subprocess32" ,python2-subprocess32)
        ("python-biom-format" ,python2-biom-format)
@@ -287,19 +274,21 @@ classify these reads by placement into phylogenetic trees")
 (define-public python2-extern
   (package
     (name "python2-extern")
-    (version "0.2.1")
+    (version "0.3.0")
     (source
      (origin
        (method url-fetch)
        (uri (pypi-uri "extern" version))
        (sha256
         (base32
-         "04p51rw84n84fa9kndz9a9zfniqsnswjmp5wajz7zc7064896yxm"))))
+         "04gl4611kz6j8arxccg27xr9hqc3dr46nagbx6hgds0h87lz0yas"))))
     (build-system python-build-system)
     (arguments
      `(#:python ,python-2)) ; python-2 only.
     (native-inputs
      `(("python-setuptools" ,python2-setuptools)))
+    (propagated-inputs
+     `(("python-subprocess32" ,python2-subprocess32)))
     (home-page "https://github.com/wwood/extern")
     (synopsis "Subprocess-related functions for ease of use")
     (description "Extern is an opinionated version of Python's subprocess, making
@@ -364,7 +353,7 @@ the description of the error.")
      `(("python-setuptools" ,python2-setuptools)
        ("python-nose" ,python2-nose)))
     (inputs
-     `(("seqmagick" ,seqmagick)
+     `(("seqmagick" ,python2-seqmagick-0.6.2)
        ("blast+" ,blast+)
        ("vsearch" ,vsearch)
        ("krona-tools" ,krona-tools)
@@ -373,7 +362,11 @@ the description of the error.")
        ("diamond" ,diamond)))
     (propagated-inputs
      `(("graftm" ,graftm)
-       ("python-biopython" ,python2-biopython)
+       ("python-biopython" ,python2-biopython-1.66) ; An outdated version is
+                                                    ; required because of
+                                                    ; seqmagick's
+                                                    ; incompatibility with the
+                                                    ; newest version.
        ("python-extern" ,python2-extern)
        ("python-tempdir" ,python2-tempdir)
        ("python-dendropy" ,python2-dendropy)
@@ -530,3 +523,39 @@ genes that are ubiquitous and single-copy within a phylogenetic lineage.")
      (synopsis "ScreamingBackpack")
      (description "ScreamingBackpack")
      (license license:gpl3+))))
+
+(define-public smafa-binary
+  (package
+    (name "smafa-binary")
+    (version "0.1.2")
+    (source
+     (origin
+       (method url-fetch)
+       (uri
+        (string-append
+         "https://github.com/wwood/smafa/releases/download/v"
+         version "/smafa-static-x86_64-unknown-linux-musl-"
+         version ".tar.gz"))
+       (sha256
+        (base32
+         "1142gdgqa7bm0gwb0zhlh13amv2g2b2lhgvb1f77vnjw5kb89fwj"))))
+    (build-system gnu-build-system)
+    (arguments
+     `(#:phases
+       (modify-phases %standard-phases
+         (delete 'configure)
+         (delete 'build)
+         (replace 'check ; this is just a binary, so run rudimentary check.
+           (lambda _ (zero? (system* "./smafa" "--help"))))
+         (replace 'install
+           (lambda* (#:key outputs #:allow-other-keys)
+             (let ((bin (string-append (assoc-ref outputs "out") "/bin/")))
+               (install-file "smafa" bin))
+             #t)))))
+    (synopsis "Biological sequence aligner for pre-aligned sequences9")
+    (description
+     "Smafa attempts to align or cluster pre-aligned biological sequences,
+handling sequences which are all the same length.  The main use case is through
+SingleM, although it can be used without independently without issue.")
+    (home-page "https://github.com/wwood/smafa")
+    (license license:gpl3+)))
