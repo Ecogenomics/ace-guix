@@ -206,13 +206,13 @@ ORF predicted and provide gene-wise coverages using DNAseq mappings.")
 (define-public graftm
   (package
     (name "graftm")
-    (version "0.10.1")
+    (version "0.11.1")
     (source (origin
               (method url-fetch)
               (uri (pypi-uri "graftm" version))
               (sha256
                (base32
-                "15nfgcs2smbmsb06hjkck0qc6b91sg9p3wya405iwxp3wvarjbv2"))))
+                "0jvlf6sd05i3h3jl3s3lqs6fbllg2hxsbvawfiryagazzxykvf5k"))))
     (build-system python-build-system)
     (arguments
      `(#:python ,python-2 ; python-2 only
@@ -226,13 +226,8 @@ ORF predicted and provide gene-wise coverages using DNAseq mappings.")
              ;; Some tests fail for strange reasons which seem likely to do with
              ;; being inside the chroot environment, rather than being actual
              ;; software problems.
-             (delete-file "test/test_archive.py")
              (delete-file "test/test_external_program_suite.py")
-             ;; Failures related to out of date DIAMOND databases
-             (delete-file "test/test_diamond.py")
-             (delete-file "test/test_expand_searcher.py")
-             (delete-file "test/test_graft.py")
-             (zero? (system* "nosetests" "-v"))))
+             (zero? (system* "nosetests" "-vx"))))
          (add-after 'install 'wrap-programs
            (lambda* (#:key outputs #:allow-other-keys)
              (let* ((out (assoc-ref outputs "out"))
@@ -251,11 +246,10 @@ ORF predicted and provide gene-wise coverages using DNAseq mappings.")
        ("fasttree" ,fasttree)
        ("krona-tools" ,krona-tools)
        ("pplacer" ,pplacer-binary) ; Use binary because it fails when built from source, as seen on some SingleM runs.
-       ("seqmagick" ,python2-seqmagick-0.6.2) ; Newer versions use python-3.
        ("mafft" ,mafft)))
     (propagated-inputs
-     `(("taxtastic" ,(python2-biopython-1.66-instead-of-biopython taxtastic))
-       ("python-biopython" ,python2-biopython-1.66)
+     `(("taxtastic" ,taxtastic)
+       ("python-biopython" ,python2-biopython)
        ("python-subprocess32" ,python2-subprocess32)
        ("python-biom-format" ,python2-biom-format)
        ("python-extern" ,python2-extern)
