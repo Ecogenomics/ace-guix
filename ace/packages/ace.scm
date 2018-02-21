@@ -39,6 +39,7 @@
   #:use-module (gnu packages boost)
   #:use-module (gnu packages check)
   #:use-module (gnu packages compression)
+  #:use-module (gnu packages databases)
   #:use-module (gnu packages python)
   #:use-module (gnu packages xml)
   #:use-module (gnu packages web)
@@ -324,13 +325,13 @@ the description of the error.")
 (define-public singlem
   (package
     (name "singlem")
-    (version "0.8.1")
+    (version "0.9.0")
     (source (origin
               (method url-fetch)
               (uri (pypi-uri "singlem" version))
               (sha256
                (base32
-                "17kc78n9g78x5hifznf92g5al9wjqcf5l239jdc3mk96fmgh59yq"))))
+                "1inp5lk9df8w2qv4dlssh8j0mhxv3kqk971dxbnjfpsl4dn7iiwx"))))
     (build-system python-build-system)
     (arguments
      `(#:python ,python-2 ; python-2 only
@@ -347,26 +348,23 @@ the description of the error.")
      `(("python-setuptools" ,python2-setuptools)
        ("python-nose" ,python2-nose)))
     (inputs
-     `(("seqmagick" ,python2-seqmagick-0.6.2)
-       ("blast+" ,blast+)
+     `(("blast+" ,blast+)
        ("vsearch" ,vsearch)
        ("krona-tools" ,krona-tools)
        ("fxtract" ,fxtract)
        ("hmmer" ,hmmer)
-       ("diamond" ,diamond)))
-    (propagated-inputs
-     `(("graftm" ,graftm)
-       ("python-biopython" ,python2-biopython-1.66) ; An outdated version is
-                                                    ; required because of
-                                                    ; seqmagick's
-                                                    ; incompatibility with the
-                                                    ; newest version.
+       ("diamond" ,diamond)
+       ("smafa" ,smafa-binary)
+       ("graftm" ,graftm)
        ("python-extern" ,python2-extern)
        ("python-tempdir" ,python2-tempdir)
        ("python-dendropy" ,python2-dendropy)
        ("python-subprocess32" ,python2-subprocess32)
        ("python-biom-format" ,python2-biom-format)
-       ("python-h5py" ,python2-h5py)))
+       ("python-h5py" ,python2-h5py)
+       ("python-orator" ,python2-orator)
+       ("python-squarify" ,python2-squarify)
+       ("python-matplotlib" ,python2-matplotlib)))
     (home-page "http://github.com/wwood/singlem")
     (synopsis "De-novo OTUs from shotgun metagenomes")
     (description
@@ -553,3 +551,26 @@ handling sequences which are all the same length.  The main use case is through
 SingleM, although it can be used without independently without issue.")
     (home-page "https://github.com/wwood/smafa")
     (license license:gpl3+)))
+
+(define-public python-squarify
+  (package
+    (name "python-squarify")
+    (version "0.3.0")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (pypi-uri "squarify" version))
+       (sha256
+        (base32
+         "0wrg7kly2jsj42b3dr37pqdqw61rgscjffvs38hwzfsgq6wdcvlb"))))
+    (build-system python-build-system)
+    (home-page
+     "https://github.com/laserson/squarify")
+    (synopsis
+     "Pure Python implementation of the squarify treemap layout algorithm")
+    (description
+     "Pure Python implementation of the squarify treemap layout algorithm")
+    (license #f)))
+
+(define-public python2-squarify
+  (package-with-python2 python-squarify))
