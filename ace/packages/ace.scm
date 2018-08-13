@@ -25,6 +25,8 @@
   #:use-module (gnu packages bioinformatics)
   #:use-module (gnu packages python)
   #:use-module (gnu packages ruby)
+  #:use-module (gnu packages statistics)
+  #:use-module (gnu packages time)
   #:use-module ((guix licenses) #:prefix license:)
   #:use-module (guix packages)
   #:use-module (guix download)
@@ -142,20 +144,22 @@ ORF predicted and provide gene-wise coverages using DNAseq mappings.")
 (define-public python2-biolib
   (package
     (name "python2-biolib")
-    (version "0.0.26")
+    (version "0.0.46")
     (source
      (origin
        (method url-fetch)
        (uri (pypi-uri "biolib" version))
        (sha256
         (base32
-         "0crs8134fycb2mr5d70jjxhk889cmwx2vch81qp28vf6jwkciwy2"))))
+         "0mmigmcwf24fz9388c360qivjnwy7amj4gv19kwmk9xhsh10sbi3"))))
     (build-system python-build-system)
     (arguments
      `(#:python ,python-2 ; Python 2 only.
        #:tests? #f)) ; No tests, and imported into genomtreetk.
-    (inputs
+    (native-inputs
      `(("python-setuptools" ,python2-setuptools)))
+    (propagated-inputs
+     `(("python-future" ,python2-future)))
     (home-page "http://pypi.python.org/pypi/biolib/")
     (synopsis "Library for common tasks in bioinformatics")
     (description
@@ -325,13 +329,14 @@ the description of the error.")
 (define-public singlem
   (package
     (name "singlem")
-    (version "0.9.0")
-    (source (origin
-              (method url-fetch)
-              (uri (pypi-uri "singlem" version))
-              (sha256
-               (base32
-                "1inp5lk9df8w2qv4dlssh8j0mhxv3kqk971dxbnjfpsl4dn7iiwx"))))
+    (version "0.10.0")
+    (source (local-file (string-append (getenv "HOME") "/git/singlem/dist/singlem-0.10.0.tar.gz")))
+    ;; (origin
+    ;;           (method url-fetch)
+    ;;           (uri (pypi-uri "singlem" version))
+    ;;           (sha256
+    ;;            (base32
+    ;;             "1inp5lk9df8w2qv4dlssh8j0mhxv3kqk971dxbnjfpsl4dn7iiwx"))))
     (build-system python-build-system)
     (arguments
      `(#:python ,python-2 ; python-2 only
@@ -346,7 +351,8 @@ the description of the error.")
              #t)))))
     (native-inputs
      `(("python-setuptools" ,python2-setuptools)
-       ("python-nose" ,python2-nose)))
+       ("python-nose" ,python2-nose)
+       ("pplacer" ,pplacer-binary)))
     (inputs
      `(("blast+" ,blast+)
        ("vsearch" ,vsearch)
@@ -355,7 +361,7 @@ the description of the error.")
        ("hmmer" ,hmmer)
        ("diamond" ,diamond)
        ("smafa" ,smafa-binary)
-       ("graftm" ,graftm)
+       ("graftm" ,graftm-dev)
        ("python-extern" ,python2-extern)
        ("python-tempdir" ,python2-tempdir)
        ("python-dendropy" ,python2-dendropy)
@@ -574,3 +580,36 @@ SingleM, although it can be used without independently without issue.")
 
 (define-public python2-squarify
   (package-with-python2 python-squarify))
+
+(define-public enrichm
+  (let ((commit "ac2de2284a658426a26d8d1736d5a0df6fb6d16e"))
+    (package
+     (name "enrichm")
+     (version (string-append "0.2.0-1." (string-take commit 8)))
+     (source (origin
+              (method git-fetch)
+              (uri (git-reference
+                    (url "https://github.com/geronimp/enrichM.git")
+                    (commit commit)))
+              (file-name (string-append name "-" version "-checkout"))
+              (sha256
+               (base32
+                "1wf9ykjfxqq0r8xrv3fjss203x1zc6ng12qzbgwkkzczv0gq6m4m"))))
+    (build-system python-build-system)
+    (arguments
+     `(#:python ,python-2 ; python-2 only
+       ))
+    (inputs
+     `(("python-dateutil+" ,python2-dateutil)
+       ("python-statsmodels" ,python2-statsmodels)
+       ("python-numpy" ,python2-numpy)
+       ("python-pandas" ,python2-pandas)
+       ("python-scipy" ,python2-scipy)
+       ("python-biopython" ,python2-biopython)
+       ("python-six" ,python2-six)))
+    (home-page "")
+    (synopsis "toolbox to compare functional composition of population genomes")
+    (description
+     "EnrichM is a toolbox for comparing the functional composition of
+population genomes.")
+    (license license:gpl3+))))
