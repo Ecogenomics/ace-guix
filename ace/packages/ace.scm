@@ -339,7 +339,7 @@ the description of the error.")
       (uri (pypi-uri "singlem" version))
       (sha256
        (base32
-        "1inp5lk9df8w2qv4dlssh8j0mhxv3kqk971dxbnjfpsl4dn7iiwx")))
+        "0kmdmmig5jds0p7zcx712jv1d2vybnzpp2mcf722bi16njczgf7w")))
      )
     (build-system python-build-system)
     (arguments
