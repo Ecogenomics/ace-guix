@@ -1,5 +1,5 @@
 ;;; GNU Guix --- Functional package management for GNU
-;;; Copyright © 2016 Ben Woodcroft <b.woodcroft@uq.edu.au>
+;;; Copyright © 2016,2017,2018 Ben Woodcroft <b.woodcroft@uq.edu.au>
 ;;;
 ;;; This file is part of the Australian Centre for Ecogenomics' GNU Guix package
 ;;; repository.
@@ -207,29 +207,32 @@ ORF predicted and provide gene-wise coverages using DNAseq mappings.")
 (define-public graftm
   (package
     (name "graftm")
-    (version "0.11.1")
-    (source (origin
-              (method url-fetch)
-              (uri (pypi-uri "graftm" version))
-              (sha256
-               (base32
-                "0jvlf6sd05i3h3jl3s3lqs6fbllg2hxsbvawfiryagazzxykvf5k"))))
+    (version "0.12.0-dev")
+    (source
+     (local-file (string-append (getenv "HOME") "/git/graftM/dist/graftm-0.12.0.tar.gz"))
+                 ;; (origin
+              ;; (method url-fetch)
+              ;; (uri (pypi-uri "graftm" version))
+              ;; (sha256
+              ;;  (base32
+              ;;   "0jvlf6sd05i3h3jl3s3lqs6fbllg2hxsbvawfiryagazzxykvf5k")))
+                 )
     (build-system python-build-system)
     (arguments
      `(#:python ,python-2 ; python-2 only
        #:phases
        (modify-phases %standard-phases
-         ;; current test in setup.py does not work so use nose to run tests
-         ;; instead for now.
+         ;; ;; current test in setup.py does not work so use nose to run tests
+         ;; ;; instead for now.
          (replace 'check
            (lambda _
              (setenv "PATH" (string-append (getcwd) "/bin:" (getenv "PATH")))
              ;; Some tests fail for strange reasons which seem likely to do with
              ;; being inside the chroot environment, rather than being actual
              ;; software problems.
-             (delete-file "test/test_external_program_suite.py")
+             ;; (delete-file "test/test_external_program_suite.py")
              (zero? (system* "nosetests" "-vx"))))
-         (add-after 'install 'wrap-programs
+         (add-after 'install 'wrap-programs-with-path
            (lambda* (#:key outputs #:allow-other-keys)
              (let* ((out (assoc-ref outputs "out"))
                     (graftm (string-append out "/bin/graftM"))
@@ -325,19 +328,21 @@ the description of the error.")
 (define-public singlem
   (package
     (name "singlem")
-    (version "0.9.0")
-    (source (origin
-              (method url-fetch)
-              (uri (pypi-uri "singlem" version))
-              (sha256
-               (base32
-                "1inp5lk9df8w2qv4dlssh8j0mhxv3kqk971dxbnjfpsl4dn7iiwx"))))
+    (version "0.11.0")
+    (source (local-file (string-append (getenv "HOME") "/git/singlem/dist/singlem-0.11.0.tar.gz"))
+     ;; (origin
+     ;;          (method url-fetch)
+     ;;          (uri (pypi-uri "singlem" version))
+     ;;          (sha256
+     ;;           (base32
+     ;;            "1inp5lk9df8w2qv4dlssh8j0mhxv3kqk971dxbnjfpsl4dn7iiwx")))
+     )
     (build-system python-build-system)
     (arguments
      `(#:python ,python-2 ; python-2 only
        #:phases
        (modify-phases %standard-phases
-         (add-after 'install 'wrap-programs
+         (add-after 'install 'wrap-programs-path
            (lambda* (#:key outputs #:allow-other-keys)
              (let* ((out (assoc-ref outputs "out"))
                     (graftm (string-append out "/bin/singlem"))
@@ -346,10 +351,10 @@ the description of the error.")
              #t)))))
     (native-inputs
      `(("python-setuptools" ,python2-setuptools)
-       ("python-nose" ,python2-nose)))
+       ("python-nose" ,python2-nose)
+       ("pplacer" ,pplacer-binary)))
     (inputs
-     `(("blast+" ,blast+)
-       ("vsearch" ,vsearch)
+     `(("vsearch" ,vsearch)
        ("krona-tools" ,krona-tools)
        ("fxtract" ,fxtract)
        ("hmmer" ,hmmer)
@@ -364,6 +369,7 @@ the description of the error.")
        ("python-h5py" ,python2-h5py)
        ("python-orator" ,python2-orator)
        ("python-squarify" ,python2-squarify)
+       ("python2-backports-functools-lru-cache" ,python2-backports-functools-lru-cache)
        ("python-matplotlib" ,python2-matplotlib)))
     (home-page "http://github.com/wwood/singlem")
     (synopsis "De-novo OTUs from shotgun metagenomes")
@@ -462,7 +468,6 @@ genes that are ubiquitous and single-copy within a phylogenetic lineage.")
               (uri (string-append
                     "https://data.ace.uq.edu.au/public/CheckM_databases/checkm_data_v"
                     version ".tar.gz"))
-              (file-name (string-append name "-" version ".tar.gz"))
               (sha256
                (base32
                 "0b69dbw3a3wl8ck8kh86z8836i0jgxb2y54nxgcw7mlb6ilw87lp"))))
