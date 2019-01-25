@@ -528,7 +528,7 @@ genes that are ubiquitous and single-copy within a phylogenetic lineage.")
 (define-public smafa-binary
   (package
     (name "smafa-binary")
-    (version "0.1.2")
+    (version "0.2.0")
     (source
      (origin
        (method url-fetch)
@@ -539,7 +539,7 @@ genes that are ubiquitous and single-copy within a phylogenetic lineage.")
          version ".tar.gz"))
        (sha256
         (base32
-         "1142gdgqa7bm0gwb0zhlh13amv2g2b2lhgvb1f77vnjw5kb89fwj"))))
+         "1zjh6h053a8n6mql9r5cib2crc9yr8g5v8vqam60brb57v37n40z"))))
     (build-system gnu-build-system)
     (arguments
      `(#:phases
