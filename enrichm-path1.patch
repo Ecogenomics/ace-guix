@@ -1,0 +1,13 @@
+diff --git a/setup.py b/setup.py
+index f5f80b6..c55e383 100755
+--- a/setup.py
++++ b/setup.py
+@@ -21,7 +21,7 @@ setup(name='enrichm',
+                         'scipy>=0.17.0',
+                         'biopython>=1.66',
+                         'six>=1.10.0',
+-                        'sklearn>=0.0'),
++                        'scikit-learn>=0.0'),
+       setup_requires=['nose>=1.0'],
+       test_suite='nose.collector',
+       url='https://github.com/geronimp/enrichM',

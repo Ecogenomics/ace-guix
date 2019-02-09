@@ -42,6 +42,8 @@
   #:use-module (gnu packages check)
   #:use-module (gnu packages compression)
   #:use-module (gnu packages databases)
+  #:use-module (gnu packages machine-learning)
+  #:use-module (gnu packages parallel)
   #:use-module (gnu packages python)
   #:use-module (gnu packages xml)
   #:use-module (gnu packages web)
@@ -585,10 +587,10 @@ SingleM, although it can be used without independently without issue.")
   (package-with-python2 python-squarify))
 
 (define-public enrichm
-  (let ((commit "ac2de2284a658426a26d8d1736d5a0df6fb6d16e"))
+  (let ((commit "26970bbe80d9e6e3e3acd3fdb6800b60f7d28cfe"))
     (package
      (name "enrichm")
-     (version (string-append "0.2.0-1." (string-take commit 8)))
+     (version (string-append "0.2.0-2." (string-take commit 8)))
      (source (origin
               (method git-fetch)
               (uri (git-reference
@@ -597,22 +599,107 @@ SingleM, although it can be used without independently without issue.")
               (file-name (string-append name "-" version "-checkout"))
               (sha256
                (base32
-                "1wf9ykjfxqq0r8xrv3fjss203x1zc6ng12qzbgwkkzczv0gq6m4m"))))
+                "1hv5vcsrcxha81mnzqpq3azw00wgb2r5nmyw9kxvfabjwxsja9ss"))
+              (patches (search-patches "enrichm-path1.patch"))))
     (build-system python-build-system)
     (arguments
-     `(#:python ,python-2 ; python-2 only
+     `(#:phases
+       (modify-phases %standard-phases
+         (add-after 'install 'wrap
+           (lambda* (#:key inputs outputs #:allow-other-keys)
+             (let* ((out (assoc-ref outputs "out"))
+                    (bin (string-append out "/bin"))
+                    (path (getenv "PATH"))
+                    (db (assoc-ref inputs "enrichm-data")))
+               (wrap-program (string-append bin "/enrichm")
+                             `("PATH" ":" prefix (,path)))
+               (wrap-program (string-append bin "/enrichm")
+                             `("ENRICHM_DB" ":" = (,db))))
+             )))
        ))
+    (native-inputs
+     `(("python-nose" ,python-nose)))
     (inputs
-     `(("python-dateutil+" ,python2-dateutil)
-       ("python-statsmodels" ,python2-statsmodels)
-       ("python-numpy" ,python2-numpy)
-       ("python-pandas" ,python2-pandas)
-       ("python-scipy" ,python2-scipy)
-       ("python-biopython" ,python2-biopython)
-       ("python-six" ,python2-six)))
+     `(("python-dateutil+" ,python-dateutil)
+       ("python-statsmodels" ,python-statsmodels)
+       ("python-numpy" ,python-numpy)
+       ("python-pandas" ,python-pandas)
+       ("python-scipy" ,python-scipy)
+       ("python-biopython" ,python-biopython)
+       ("python-six" ,python-six)
+       ("python-sklearn" ,python-scikit-learn)
+       ("hmmer" ,hmmer)
+       ("seqmagick" ,seqmagick)
+       ("diamond" ,diamond)
+       ("prodigal" ,prodigal)
+       ("parallel" ,parallel)
+       ("mmseqs" ,mmseqs)
+       ("r" ,r)))
     (home-page "")
     (synopsis "toolbox to compare functional composition of population genomes")
     (description
      "EnrichM is a toolbox for comparing the functional composition of
 population genomes.")
     (license license:gpl3+))))
+
+(define-public enrichm-data
+  (package
+   (name "enrichm-data")
+   (version "7")
+   (source (origin
+            (method url-fetch/tarbomb)
+            (uri (string-append
+                  "https://data.ace.uq.edu.au/public/enrichm/enrichm_database_v"
+                  version ".tar.gz"))
+            (sha256
+             (base32
+              "19bpnwxxj5kwv0igzd1071cbp8w0vpp7srik15dm8mw661rddmn6"))))
+   (build-system gnu-build-system)
+   (arguments
+    `(#:phases
+      (modify-phases %standard-phases
+                     (delete 'configure)
+                     (delete 'build)
+                     (delete 'check)
+                     (replace 'install
+                              (lambda* (#:key outputs #:allow-other-keys)
+                                (copy-recursively "." (assoc-ref outputs "out")))))))
+   (synopsis "Data for EnrichM")
+   (description
+    "Data for EnrichM")
+   (home-page "https://ecogenomics.github.io/CheckM")
+   (license license:gpl3+)))
+
+(define-public refinem
+  (package
+    (name "refinem")
+    (version "0.0.24")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (pypi-uri "refinem" version))
+       (sha256
+        (base32
+         "14k3drncdy559v3ibr44scxds1jyk5dv7w27mh4bv3z1m9fx2q13"))))
+    (build-system python-build-system)
+    (arguments
+     `(#:python ,python-2))
+    (inputs
+     `(("python-biolib" ,python2-biolib)
+       ("python-jinja2" ,python2-jinja2)
+       ("python-matplotlib" ,python2-matplotlib)
+       ("python-mpld3" ,python2-mpld3)
+       ("python-numpy" ,python2-numpy)
+       ("python-pysam" ,python2-pysam)
+       ("python-weightedstats" ,python2-weightedstats)
+       ("prodigal" ,prodigal)
+       ("blast+" ,blast+)
+       ("diamond" ,diamond)
+       ("krona-tools" ,krona-tools)))
+    (home-page
+     "http://pypi.python.org/pypi/refinem/")
+    (synopsis
+     "A toolbox for improving population genomes.")
+    (description
+     "A toolbox for improving population genomes.")
+    (license license:gpl3)))
