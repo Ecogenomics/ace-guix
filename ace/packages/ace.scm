@@ -465,31 +465,31 @@ genes that are ubiquitous and single-copy within a phylogenetic lineage.")
 
 (define-public checkm-data
   (package
-    (name "checkm-data")
-    (version "1.0.9")
-    (source (origin
-              (method url-fetch/tarbomb)
-              (uri (string-append
-                    "https://data.ace.uq.edu.au/public/CheckM_databases/checkm_data_v"
-                    version ".tar.gz"))
-              (sha256
-               (base32
-                "0b69dbw3a3wl8ck8kh86z8836i0jgxb2y54nxgcw7mlb6ilw87lp"))))
-    (build-system gnu-build-system)
-    (arguments
-     `(#:phases
-       (modify-phases %standard-phases
-         (delete 'configure)
-         (delete 'build)
-         (delete 'check)
-         (replace 'install
-           (lambda* (#:key outputs #:allow-other-keys)
-             (copy-recursively "." (assoc-ref outputs "out")))))))
-    (synopsis "Data for CheckM")
-    (description
-     "Data for CheckM")
-    (home-page "https://ecogenomics.github.io/CheckM")
-    (license license:gpl3+)))
+   (name "checkm-data")
+   (version "2015_01_16")
+   (source (origin
+            (method url-fetch/tarbomb)
+            (uri (string-append
+                  "https://data.ace.uq.edu.au/public/CheckM_databases/checkm_data_"
+                  version ".tar.gz"))
+            (sha256
+             (base32
+              "0b69dbw3a3wl8ck8kh86z8836i0jgxb2y54nxgcw7mlb6ilw87lp"))))
+   (build-system gnu-build-system)
+   (arguments
+    `(#:phases
+      (modify-phases %standard-phases
+                     (delete 'configure)
+                     (delete 'build)
+                     (delete 'check)
+                     (replace 'install
+                              (lambda* (#:key outputs #:allow-other-keys)
+                                (copy-recursively "." (assoc-ref outputs "out")))))))
+   (synopsis "Data for CheckM")
+   (description
+    "Data for CheckM")
+   (home-page "https://ecogenomics.github.io/CheckM")
+   (license license:gpl3+)))
 
 ;; Only used for checkm, so not contributed to main Guix repository until checkm
 ;; is.  Do not define-public as it is only used by CheckM, at least for the
