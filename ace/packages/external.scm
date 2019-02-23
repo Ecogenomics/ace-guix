@@ -30,6 +30,7 @@
   #:use-module (gnu packages bioinformatics)
   #:use-module (gnu packages check)
   #:use-module (gnu packages python)
+  #:use-module (gnu packages python-xyz)
   #:use-module (gnu packages vim))
 
 ;;; The pplacer that is installed with Guix on occasion generates errors like so:

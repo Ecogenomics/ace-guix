@@ -616,7 +616,8 @@ SingleM, although it can be used without independently without issue.")
     (native-inputs
      `(("python-nose" ,python-nose)))
     (inputs
-     `(("python-dateutil+" ,python-dateutil)
+     `(("enrichm-data" ,enrichm-data)
+       ("python-dateutil+" ,python-dateutil)
        ("python-statsmodels" ,python-statsmodels)
        ("python-numpy" ,python-numpy)
        ("python-pandas" ,python-pandas)
@@ -641,15 +642,15 @@ population genomes.")
 (define-public enrichm-data
   (package
    (name "enrichm-data")
-   (version "7")
+   (version "8")
    (source (origin
-            (method url-fetch/tarbomb)
+            (method url-fetch)
             (uri (string-append
                   "https://data.ace.uq.edu.au/public/enrichm/enrichm_database_v"
                   version ".tar.gz"))
             (sha256
              (base32
-              "19bpnwxxj5kwv0igzd1071cbp8w0vpp7srik15dm8mw661rddmn6"))))
+              "0h8jzj020gjjfyc3hgg9pmaksa3v740rsh6pa1nbjnzz9rvpzbqz"))))
    (build-system gnu-build-system)
    (arguments
     `(#:phases
@@ -659,11 +660,14 @@ population genomes.")
                      (delete 'check)
                      (replace 'install
                               (lambda* (#:key outputs #:allow-other-keys)
-                                (copy-recursively "." (assoc-ref outputs "out")))))))
+				       (let ((out (assoc-ref outputs "out")))
+					 (symlink out "26-11-2018")
+					 (copy-recursively "." out)
+					 #t))))))
    (synopsis "Data for EnrichM")
    (description
     "Data for EnrichM")
-   (home-page "https://ecogenomics.github.io/CheckM")
+   (home-page "https://github.com/geronimp/enrichM")
    (license license:gpl3+)))
 
 (define-public refinem
