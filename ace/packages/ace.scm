@@ -45,6 +45,7 @@
   #:use-module (gnu packages machine-learning)
   #:use-module (gnu packages parallel)
   #:use-module (gnu packages python)
+  #:use-module (gnu packages python-xyz)
   #:use-module (gnu packages xml)
   #:use-module (gnu packages web)
   #:use-module (ice-9 regex))
@@ -213,15 +214,15 @@ ORF predicted and provide gene-wise coverages using DNAseq mappings.")
 (define-public graftm
   (package
     (name "graftm")
-    (version "0.12.0-dev")
+    (version "0.12.2")
     (source
-     (local-file (string-append (getenv "HOME") "/git/graftM/dist/graftm-0.12.0.tar.gz"))
-                 ;; (origin
-              ;; (method url-fetch)
-              ;; (uri (pypi-uri "graftm" version))
-              ;; (sha256
-              ;;  (base32
-              ;;   "0jvlf6sd05i3h3jl3s3lqs6fbllg2hxsbvawfiryagazzxykvf5k")))
+     ;; (local-file (string-append (getenv "HOME") "/git/graftM/dist/graftm-0.12.1.tar.gz"))
+                 (origin
+              (method url-fetch)
+              (uri (pypi-uri "graftm" version))
+              (sha256
+               (base32
+                "1aghwid038q5077v9v51bz3214qnc1hgrbagp1cj6mdcavi8ig8s")))
                  )
     (build-system python-build-system)
     (arguments
@@ -334,18 +335,19 @@ the description of the error.")
 (define-public singlem
   (package
     (name "singlem")
-    (version "0.11.0")
-    (source ;; (local-file (string-append (getenv "HOME") "/git/singlem/dist/singlem-0.11.0.tar.gz"))
+    (version "0.12.1")
+    (source ;(local-file (string-append (getenv "HOME") "/git/singlem/dist/singlem-0.12.1.tar.gz"))
      (origin
       (method url-fetch)
       (uri (pypi-uri "singlem" version))
       (sha256
        (base32
-        "0kmdmmig5jds0p7zcx712jv1d2vybnzpp2mcf722bi16njczgf7w")))
+        "1a3l8wv8p5bzjrrxcwjcravijbn4f9i5sa8yadsxgg6magspi0jr")))
      )
     (build-system python-build-system)
     (arguments
      `(#:python ,python-2 ; python-2 only
+       #:tests? #f
        #:phases
        (modify-phases %standard-phases
          (add-after 'install 'wrap-programs-path
@@ -358,6 +360,7 @@ the description of the error.")
     (native-inputs
      `(("python-setuptools" ,python2-setuptools)
        ("python-nose" ,python2-nose)
+       ("express-beta-diversity" ,express-beta-diversity)
        ("pplacer" ,pplacer-binary)))
     (inputs
      `(("vsearch" ,vsearch)
@@ -366,7 +369,7 @@ the description of the error.")
        ("hmmer" ,hmmer)
        ("diamond" ,diamond)
        ("smafa" ,smafa-binary)
-       ("graftm" ,graftm-dev)
+       ("graftm" ,graftm)
        ("python-extern" ,python2-extern)
        ("python-tempdir" ,python2-tempdir)
        ("python-dendropy" ,python2-dendropy)
@@ -474,6 +477,7 @@ genes that are ubiquitous and single-copy within a phylogenetic lineage.")
             (uri (string-append
                   "https://data.ace.uq.edu.au/public/CheckM_databases/checkm_data_"
                   version ".tar.gz"))
+            (file-name "checkm_data_2015_01_16.tar.gz")
             (sha256
              (base32
               "0b69dbw3a3wl8ck8kh86z8836i0jgxb2y54nxgcw7mlb6ilw87lp"))))
