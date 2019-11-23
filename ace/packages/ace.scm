@@ -260,7 +260,7 @@ ORF predicted and provide gene-wise coverages using DNAseq mappings.")
        ("mafft" ,mafft)
        ("perl" ,perl))) ; For interleaved files
     (propagated-inputs
-     `(("taxtastic" ,taxtastic)
+     `(("taxtastic" ,python-taxtastic)
        ("python-biopython" ,python-biopython)
        ("python-biom-format" ,python-biom-format)
        ("python-extern" ,python-extern)
@@ -344,6 +344,10 @@ the description of the error.")
     (arguments
      `(#:phases
        (modify-phases %standard-phases
+         (replace 'check
+           (lambda _
+             (setenv "PATH" (string-append (getcwd) "/bin:" (getenv "PATH")))
+             (invoke "bin/singlem" "--help")))
          (add-after 'install 'wrap-programs-path
            (lambda* (#:key outputs #:allow-other-keys)
              (let* ((out (assoc-ref outputs "out"))
@@ -364,6 +368,7 @@ the description of the error.")
        ("diamond" ,diamond)
        ("smafa" ,smafa-binary)
        ("graftm" ,graftm)
+       ("taxtastic" ,python-taxtastic)
        ("python-extern" ,python-extern)
        ("python-tempdir" ,python-tempdir)
        ("python-dendropy" ,python-dendropy)

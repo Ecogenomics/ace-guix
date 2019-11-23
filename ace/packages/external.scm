@@ -29,6 +29,7 @@
   #:use-module (guix build-system python)
   #:use-module (gnu packages bioinformatics)
   #:use-module (gnu packages check)
+  #:use-module (gnu packages databases)
   #:use-module (gnu packages python)
   #:use-module (gnu packages python-xyz)
   #:use-module (gnu packages vim))
@@ -187,3 +188,38 @@ PSI-BLAST but at around 270 times its speed.")
 
 (define-public python2-weightedstats
   (package-with-python2 python-weightedstats))
+
+(define-public python-taxtastic ; In main guix repo, but that needs update to python3
+  (package
+    (name "taxtastic")
+    (version "0.8.5")
+    (source (origin
+              (method url-fetch)
+              (uri (pypi-uri "taxtastic" version))
+              (sha256
+               (base32
+                "03pysw79lsrvz4lwzis88j15067ffqbi4cid5pqhrlxmd6bh8rrk"))))
+    (build-system python-build-system)
+    (arguments
+     `(#:phases
+       (modify-phases %standard-phases
+         (replace 'check
+           (lambda _ (invoke "python3" "-m" "unittest" "discover" "-v") #t)))))
+    (propagated-inputs
+     `(("python-sqlalchemy" ,python-sqlalchemy)
+       ("python-decorator" ,python-decorator)
+       ("python-biopython" ,python-biopython)
+       ("python-pandas" ,python-pandas)
+       ("python-psycopg2" ,python-psycopg2)
+       ("python-fastalite" ,python-fastalite)
+       ("python-pyyaml" ,python-pyyaml)
+       ("python-six" ,python-six)
+       ("python-jinja2" ,python-jinja2)
+       ("python-dendropy" ,python-dendropy)))
+    (home-page "https://github.com/fhcrc/taxtastic")
+    (synopsis "Tools for taxonomic naming and annotation")
+    (description
+     "Taxtastic is software written in python used to build and maintain
+reference packages i.e. collections of reference trees, reference alignments,
+profiles, and associated taxonomic information.")
+    (license license:gpl3+)))
