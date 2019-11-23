@@ -44,6 +44,7 @@
   #:use-module (gnu packages databases)
   #:use-module (gnu packages machine-learning)
   #:use-module (gnu packages parallel)
+  #:use-module (gnu packages perl)
   #:use-module (gnu packages python)
   #:use-module (gnu packages python-xyz)
   #:use-module (gnu packages xml)
@@ -214,20 +215,19 @@ ORF predicted and provide gene-wise coverages using DNAseq mappings.")
 (define-public graftm
   (package
     (name "graftm")
-    (version "0.12.2")
+    (version "0.13.0")
     (source
-     ;; (local-file (string-append (getenv "HOME") "/git/graftM/dist/graftm-0.12.1.tar.gz"))
-                 (origin
-              (method url-fetch)
-              (uri (pypi-uri "graftm" version))
-              (sha256
-               (base32
-                "1aghwid038q5077v9v51bz3214qnc1hgrbagp1cj6mdcavi8ig8s")))
+     (local-file (string-append (getenv "HOME") "/git/graftM/dist/graftm-0.13.0.tar.gz"))
+              ;    (origin
+              ; (method url-fetch)
+              ; (uri (pypi-uri "graftm" version))
+              ; (sha256
+              ;  (base32
+              ;   "1aghwid038q5077v9v51bz3214qnc1hgrbagp1cj6mdcavi8ig8s")))
                  )
     (build-system python-build-system)
     (arguments
-     `(#:python ,python-2 ; python-2 only
-       #:phases
+     `(#:phases
        (modify-phases %standard-phases
          ;; ;; current test in setup.py does not work so use nose to run tests
          ;; ;; instead for now.
@@ -247,26 +247,26 @@ ORF predicted and provide gene-wise coverages using DNAseq mappings.")
                (wrap-program graftm `("PATH" ":" prefix (,path))))
              #t)))))
     (native-inputs
-     `(("python-setuptools" ,python2-setuptools)
-       ("python-nose" ,python2-nose)))
+     `(("python-setuptools" ,python-setuptools)
+       ("python-nose" ,python-nose)))
     (inputs
      `(("orfm" ,orfm)
        ("hmmer" ,hmmer)
        ("diamond" ,diamond)
-       ("fxtract" ,fxtract)
+       ("mfqe" ,mfqe-binary)
        ("fasttree" ,fasttree)
        ("krona-tools" ,krona-tools)
        ("pplacer" ,pplacer-binary) ; Use binary because it fails when built from source, as seen on some SingleM runs.
-       ("mafft" ,mafft)))
+       ("mafft" ,mafft)
+       ("perl" ,perl))) ; For interleaved files
     (propagated-inputs
      `(("taxtastic" ,taxtastic)
-       ("python-biopython" ,python2-biopython)
-       ("python-subprocess32" ,python2-subprocess32)
-       ("python-biom-format" ,python2-biom-format)
-       ("python-extern" ,python2-extern)
-       ("python-h5py" ,python2-h5py)
-       ("python-tempdir" ,python2-tempdir)
-       ("python-dendropy" ,python2-dendropy)))
+       ("python-biopython" ,python-biopython)
+       ("python-biom-format" ,python-biom-format)
+       ("python-extern" ,python-extern)
+       ("python-h5py" ,python-h5py)
+       ("python-tempdir" ,python-tempdir)
+       ("python-dendropy" ,python-dendropy)))
     (home-page "http://geronimp.github.com/graftM")
     (synopsis "Identify and classify metagenomic marker gene reads")
     (description
@@ -276,24 +276,20 @@ marker genes using hidden Markov models or sequence similarity search, and
 classify these reads by placement into phylogenetic trees")
     (license license:gpl3+)))
 
-(define-public python2-extern
+(define-public python-extern
   (package
-    (name "python2-extern")
-    (version "0.3.0")
+    (name "python-extern")
+    (version "0.4.1")
     (source
      (origin
        (method url-fetch)
        (uri (pypi-uri "extern" version))
        (sha256
         (base32
-         "04gl4611kz6j8arxccg27xr9hqc3dr46nagbx6hgds0h87lz0yas"))))
+         "1r5ins3cpldyqrdr4kbv2aq9ymkl755h4h8nwg8z68yl5bf1mw0g"))))
     (build-system python-build-system)
-    (arguments
-     `(#:python ,python-2)) ; python-2 only.
     (native-inputs
-     `(("python-setuptools" ,python2-setuptools)))
-    (propagated-inputs
-     `(("python-subprocess32" ,python2-subprocess32)))
+     `(("python-setuptools" ,python-setuptools)))
     (home-page "https://github.com/wwood/extern")
     (synopsis "Subprocess-related functions for ease of use")
     (description "Extern is an opinionated version of Python's subprocess, making
@@ -335,20 +331,18 @@ the description of the error.")
 (define-public singlem
   (package
     (name "singlem")
-    (version "0.12.1")
-    (source ;(local-file (string-append (getenv "HOME") "/git/singlem/dist/singlem-0.12.1.tar.gz"))
-     (origin
-      (method url-fetch)
-      (uri (pypi-uri "singlem" version))
-      (sha256
-       (base32
-        "1a3l8wv8p5bzjrrxcwjcravijbn4f9i5sa8yadsxgg6magspi0jr")))
+    (version "0.13.0")
+    (source (local-file (string-append (getenv "HOME") "/git/singlem/dist/singlem-" version ".tar.gz"))
+    ;  (origin
+    ;   (method url-fetch)
+    ;   (uri (pypi-uri "singlem" version))
+    ;   (sha256
+    ;    (base32
+    ;     "1a3l8wv8p5bzjrrxcwjcravijbn4f9i5sa8yadsxgg6magspi0jr")))
      )
     (build-system python-build-system)
     (arguments
-     `(#:python ,python-2 ; python-2 only
-       #:tests? #f
-       #:phases
+     `(#:phases
        (modify-phases %standard-phases
          (add-after 'install 'wrap-programs-path
            (lambda* (#:key outputs #:allow-other-keys)
@@ -358,8 +352,8 @@ the description of the error.")
                (wrap-program graftm `("PATH" ":" prefix (,path))))
              #t)))))
     (native-inputs
-     `(("python-setuptools" ,python2-setuptools)
-       ("python-nose" ,python2-nose)
+     `(("python-setuptools" ,python-setuptools)
+       ("python-nose" ,python-nose)
        ("express-beta-diversity" ,express-beta-diversity)
        ("pplacer" ,pplacer-binary)))
     (inputs
@@ -370,16 +364,14 @@ the description of the error.")
        ("diamond" ,diamond)
        ("smafa" ,smafa-binary)
        ("graftm" ,graftm)
-       ("python-extern" ,python2-extern)
-       ("python-tempdir" ,python2-tempdir)
-       ("python-dendropy" ,python2-dendropy)
-       ("python-subprocess32" ,python2-subprocess32)
-       ("python-biom-format" ,python2-biom-format)
-       ("python-h5py" ,python2-h5py)
-       ("python-orator" ,python2-orator)
-       ("python-squarify" ,python2-squarify)
-       ("python2-backports-functools-lru-cache" ,python2-backports-functools-lru-cache)
-       ("python-matplotlib" ,python2-matplotlib)))
+       ("python-extern" ,python-extern)
+       ("python-tempdir" ,python-tempdir)
+       ("python-dendropy" ,python-dendropy)
+       ("python-biom-format" ,python-biom-format)
+       ("python-h5py" ,python-h5py)
+       ("python-orator" ,python-orator)
+       ("python-squarify" ,python-squarify)
+       ("python-matplotlib" ,python-matplotlib)))
     (home-page "http://github.com/wwood/singlem")
     (synopsis "De-novo OTUs from shotgun metagenomes")
     (description
@@ -534,7 +526,7 @@ genes that are ubiquitous and single-copy within a phylogenetic lineage.")
 (define-public smafa-binary
   (package
     (name "smafa-binary")
-    (version "0.2.0")
+    (version "0.5.0")
     (source
      (origin
        (method url-fetch)
@@ -545,7 +537,7 @@ genes that are ubiquitous and single-copy within a phylogenetic lineage.")
          version ".tar.gz"))
        (sha256
         (base32
-         "1zjh6h053a8n6mql9r5cib2crc9yr8g5v8vqam60brb57v37n40z"))))
+         "0ai1iqpb0g5gs49kq3028z7c51nalpw2z7v19h1gx3b9nsavisww"))))
     (build-system gnu-build-system)
     (arguments
      `(#:phases
@@ -709,3 +701,44 @@ population genomes.")
     (description
      "A toolbox for improving population genomes.")
     (license license:gpl3)))
+
+(define-public mfqe-binary
+  (package
+    (name "mfqe-binary")
+    (version "0.5.0")
+    (source
+     ;; (local-file (string-append (getenv "HOME") "/git/coverm/target/release")
+     ;;             #:recursive? #t))
+     (origin
+       (method url-fetch)
+       (uri (string-append "https://github.com/wwood/mfqe/releases/download/v"
+                           version
+                           "/mfqe-static-x86_64-unknown-linux-musl-"
+                           version
+                           ".tar.gz"))
+       (sha256
+        (base32
+         "1x9ja9xg0grmcjd8dl1vyy8pg1hgy11q2zhqdpnwmi32y171608z"))))
+    (build-system gnu-build-system)
+    (arguments
+     `(#:phases
+       (modify-phases %standard-phases
+         (delete 'configure)
+         (delete 'build)
+         (replace 'check
+                  (lambda _
+                    (invoke "./mfqe" "-h")))
+         ;; ;; (delete 'strip) ; Does not work. Eh.
+         ;; (delete 'validate-runpath)
+         (replace 'install
+           (lambda* (#:key inputs outputs #:allow-other-keys)
+             (let* ((bin (string-append (assoc-ref outputs "out") "/bin/"))
+                    (file "mfqe"))
+               (install-file file bin)
+               #t))))))
+    (synopsis "Extract one or more sets of reads by name from a FASTA/Q file")
+    (description
+     "Extract one or more sets of reads from a FASTQ (or FASTA) file by
+specifying their read names.")
+    (home-page "https://github.com/wwood/mfqe")
+    (license license:gpl3+)))
