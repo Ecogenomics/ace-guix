@@ -215,16 +215,16 @@ ORF predicted and provide gene-wise coverages using DNAseq mappings.")
 (define-public graftm
   (package
     (name "graftm")
-    (version "0.13.0")
+    (version "0.13.1")
     (source
-     (local-file (string-append (getenv "HOME") "/git/graftM/dist/graftm-0.13.0.tar.gz"))
-              ;    (origin
-              ; (method url-fetch)
-              ; (uri (pypi-uri "graftm" version))
-              ; (sha256
-              ;  (base32
-              ;   "1aghwid038q5077v9v51bz3214qnc1hgrbagp1cj6mdcavi8ig8s")))
-                 )
+     ;(local-file (string-append (getenv "HOME") "/git/graftM/dist/graftm-0.13.1.tar.gz"))
+      (origin
+       (method url-fetch)
+       (uri (pypi-uri "graftm" version))
+       (sha256
+        (base32
+         "174w1q8m50qywmzlf6pjanl7plw2rcs2cryhlsfb9fr10sn8lnfz")))
+      )
     (build-system python-build-system)
     (arguments
      `(#:phases
