@@ -332,13 +332,13 @@ the description of the error.")
   (package
     (name "singlem")
     (version "0.13.0")
-    (source (local-file (string-append (getenv "HOME") "/git/singlem/dist/singlem-" version ".tar.gz"))
-    ;  (origin
-    ;   (method url-fetch)
-    ;   (uri (pypi-uri "singlem" version))
-    ;   (sha256
-    ;    (base32
-    ;     "1a3l8wv8p5bzjrrxcwjcravijbn4f9i5sa8yadsxgg6magspi0jr")))
+    (source ;(local-file (string-append (getenv "HOME") "/git/singlem/dist/singlem-" version ".tar.gz"))
+     (origin
+      (method url-fetch)
+      (uri (pypi-uri "singlem" version))
+      (sha256
+       (base32
+        "1n2c8bxqf68gf0fznmnfpv0vmmfsjh0byy79hzyx01cvx2d647xs")))
      )
     (build-system python-build-system)
     (arguments
@@ -359,7 +359,7 @@ the description of the error.")
     (inputs
      `(("vsearch" ,vsearch)
        ("krona-tools" ,krona-tools)
-       ("fxtract" ,fxtract)
+       ("mfqe" ,mfqe-binary)
        ("hmmer" ,hmmer)
        ("diamond" ,diamond)
        ("smafa" ,smafa-binary)
